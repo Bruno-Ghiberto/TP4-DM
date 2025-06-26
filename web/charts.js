@@ -95,10 +95,143 @@ function createPricePerformanceChart(drones) {
                     },
                     ticks: {
                         callback: function(value) {
-                            return '# 🚁 SISTEMA COMPLETO DE COMPARADOR DE DRONES';
+                            return '$' + value.toLocaleString();
                         }
                     }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Score de Rendimiento',
+                        font: { size: 14 }
+                    },
+                    beginAtZero: true,
+                    max: 100
                 }
             }
-                    }
+        }
     });
+}
+
+// ========================================
+// DISTRIBUCIÓN POR MARCA
+// ========================================
+
+function createBrandDistributionChart(drones) {
+    const ctx = document.getElementById('brand-distribution-chart');
+    if (!ctx) return;
+    
+    // Contar drones por marca
+    const brandCounts = {};
+    drones.forEach(drone => {
+        brandCounts[drone.marca] = (brandCounts[drone.marca] || 0) + 1;
+    });
+    
+    charts.brandDistribution = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(brandCounts),
+            datasets: [{
+                data: Object.values(brandCounts),
+                backgroundColor: [
+                    'rgba(37, 99, 235, 0.8)',
+                    'rgba(124, 58, 237, 0.8)',
+                    'rgba(16, 185, 129, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// ========================================
+// ADOPCIÓN DE CARACTERÍSTICAS
+// ========================================
+
+function createFeaturesAdoptionChart(drones) {
+    const ctx = document.getElementById('features-adoption-chart');
+    if (!ctx) return;
+    
+    const features = {
+        'Evita Obstáculos': d => d.features.evita_obstaculos,
+        'Retorno Auto': d => d.features.retorno_automatico,
+        'Seguimiento': d => d.features.seguimiento_objeto,
+        'Vuelo Nocturno': d => d.features.vuelo_nocturno,
+        'Modo Sport': d => d.features.modo_sport
+    };
+    
+    const featureCounts = {};
+    Object.entries(features).forEach(([name, getter]) => {
+        featureCounts[name] = drones.filter(getter).length;
+    });
+    
+    charts.featuresAdoption = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(featureCounts),
+            datasets: [{
+                label: 'Drones con característica',
+                data: Object.values(featureCounts),
+                backgroundColor: 'rgba(37, 99, 235, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// ========================================
+// RANGOS DE PRECIO
+// ========================================
+
+function createPriceRangesChart(drones) {
+    const ctx = document.getElementById('price-ranges-chart');
+    if (!ctx) return;
+    
+    const ranges = {
+        '$0-500': d => d.precio <= 500,
+        '$500-1500': d => d.precio > 500 && d.precio <= 1500,
+        '$1500-3000': d => d.precio > 1500 && d.precio <= 3000,
+        '$3000+': d => d.precio > 3000
+    };
+    
+    const rangeCounts = {};
+    Object.entries(ranges).forEach(([label, filter]) => {
+        rangeCounts[label] = drones.filter(filter).length;
+    });
+    
+    charts.priceRanges = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(rangeCounts),
+            datasets: [{
+                data: Object.values(rangeCounts),
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(37, 99, 235, 0.8)',
+                    'rgba(124, 58, 237, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}

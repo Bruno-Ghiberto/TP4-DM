@@ -145,7 +145,7 @@ class DroneScraperOrchestrator:
         
         return products
     
-    def _scrape_with_selenium(self, brand: str, config: Dict) -> List[Dict]:
+    async def _scrape_with_selenium(self, brand: str, config: Dict) -> List[Dict]:
         """Scraping de sitios con JavaScript pesado"""
         products = []
         
@@ -186,7 +186,7 @@ class DroneScraperOrchestrator:
                         products.append(product_data)
                     
                     # Delay entre productos
-                    asyncio.run(asyncio.sleep(config.get('delay_between_requests', 3)))
+                    await asyncio.sleep(config.get('delay_between_requests', 3))
         
         finally:
             if self.driver:

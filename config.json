@@ -1,0 +1,59 @@
+{
+  "project": {
+    "name": "DroneMatch Pro",
+    "version": "1.0.0",
+    "description": "Sistema inteligente de comparación de drones",
+    "author": "Equipo de Desarrollo Web Scraping",
+    "license": "MIT",
+    "repository": "https://github.com/Bruno-Ghiberto/TP4-DM"
+  },
+  "scraping": {
+    "user_agent": "Academic-Drone-Research-Bot/1.0 (+contact@universidad.edu)",
+    "min_delay_seconds": 3,
+    "max_retries": 2,
+    "timeout": 15,
+    "respect_robots_txt": true,
+    "max_products_per_brand": 50,
+    "brands": ["DJI", "Autel", "Parrot"]
+  },
+  "analysis": {
+    "min_data_quality": 0.7,
+    "performance_weights": {
+      "autonomy": 0.25,
+      "range": 0.20,
+      "speed": 0.15,
+      "camera": 0.25,
+      "features": 0.15
+    },
+    "price_tiers": {
+      "budget": [0, 500],
+      "mid_range": [500, 1500],
+      "high_end": [1500, 3000],
+      "professional": [3000, 10000],
+      "enterprise": [10000, null]
+    }
+  },
+  "frontend": {
+    "items_per_page": 12,
+    "max_comparison": 5,
+    "chart_colors": [
+      "#2563eb",
+      "#7c3aed",
+      "#10b981",
+      "#f59e0b",
+      "#ef4444"
+    ],
+    "api_endpoints": {
+      "data": "../analysis/solution_data.json",
+      "rankings": "../analysis/drone_rankings.json",
+      "insights": "../analysis/analysis_report.json"
+    }
+  },
+  "paths": {
+    "raw_data": "data/raw/",
+    "processed_data": "data/processed/",
+    "analysis_output": "analysis/",
+    "web_assets": "web/assets/",
+    "logs": "logs/"
+  }
+}

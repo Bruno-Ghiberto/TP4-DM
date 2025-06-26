@@ -1050,7 +1050,7 @@ function loadInsights() {
 
 function formatPrice(price) {
     if (!price) return 'N/A';
-    return price.toLocaleString('es-ES');
+    return `$${price.toLocaleString('es-ES')}`;
 }
 
 function formatDistance(meters) {
