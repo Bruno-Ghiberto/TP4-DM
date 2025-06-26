@@ -421,8 +421,7 @@ class DroneScraperOrchestrator:
         specs_data = {
             'especificaciones_tecnicas': {},
             'camara': {},
-            'caracteristicas_vuelo': {},
-            'precio': {'usd': None, 'moneda_local': None, 'fecha_precio': None}
+            'caracteristicas_vuelo': {}
         }
         
         # Patrones de extracción específicos para PDFs de Parrot
@@ -511,19 +510,6 @@ class DroneScraperOrchestrator:
         except:
             drone_data['modelo'] = self._extract_model_from_url(url)
         
-        # Extraer precio
-        try:
-            price_elem = soup.select_one(selectors['price'])
-            if price_elem:
-                price_text = price_elem.text.strip()
-                drone_data['precio'] = {
-                    'usd': self.data_cleaner.normalize_price_formats(price_text),
-                    'moneda_local': None,
-                    'fecha_precio': datetime.now().strftime('%Y-%m-%d')
-                }
-        except:
-            drone_data['precio'] = {'usd': None, 'moneda_local': None, 'fecha_precio': None}
-        
         # Extraer especificaciones técnicas
         specs = self._extract_technical_specs(soup, selectors)
         drone_data['especificaciones_tecnicas'] = specs
@@ -578,62 +564,126 @@ class DroneScraperOrchestrator:
                         specs['temperatura_operacion'] = value
         else:
             # Si no hay tabla, buscar en todo el texto de la página
-            page_text = soup.get_text().lower()
+            page_text = soup.get_text()
             
             # Usar patrones regex para extraer specs del texto general
             import re
             
-            # Peso
+            # Peso - patrones más amplios
             weight_patterns = [
                 r'weight[:\s]*(\d+\.?\d*)\s*(g|grams?|kg)',
-                r'(\d+\.?\d*)\s*(g|grams?)\s*weight',
-                r'weighs?\s*(\d+\.?\d*)\s*(g|grams?|kg)'
+                r'(\d+\.?\d*)\s*(g|grams?|kg)\s*weight',
+                r'weighs?\s*(\d+\.?\d*)\s*(g|grams?|kg)',
+                r'takeoff weight[:\s]*(\d+\.?\d*)\s*(g|grams?|kg)',
+                r'(\d+\.?\d*)\s*g\b',  # Simplemente números seguidos de 'g'
+                r'(\d+\.?\d*)\s*kg\b'  # Simplemente números seguidos de 'kg'
             ]
             
             for pattern in weight_patterns:
-                match = re.search(pattern, page_text)
+                match = re.search(pattern, page_text, re.IGNORECASE)
                 if match:
-                    value, unit = match.groups()
-                    if unit.lower() in ['kg']:
-                        specs['peso_gramos'] = float(value) * 1000
-                    else:
-                        specs['peso_gramos'] = float(value)
-                    break
+                    try:
+                        if len(match.groups()) == 2:
+                            value, unit = match.groups()
+                        else:
+                            value = match.group(1)
+                            unit = 'g' if 'g' in match.group(0).lower() and 'kg' not in match.group(0).lower() else 'kg'
+                        
+                        value = float(value)
+                        if unit.lower() in ['kg']:
+                            specs['peso_gramos'] = value * 1000
+                        else:
+                            specs['peso_gramos'] = value
+                        break
+                    except (ValueError, IndexError):
+                        continue
             
-            # Tiempo de vuelo
+            # Tiempo de vuelo - patrones más amplios
             flight_patterns = [
-                r'flight time[:\s]*(\d+)\s*(?:min|minutes)',
+                r'flight time[:\s]*(\d+)\s*(?:min|minutes?)',
                 r'(\d+)\s*(?:min|minutes?)\s*flight\s*time',
-                r'up to\s*(\d+)\s*(?:min|minutes?)\s*flight'
+                r'up to\s*(\d+)\s*(?:min|minutes?)\s*(?:of\s*)?flight',
+                r'battery life[:\s]*(\d+)\s*(?:min|minutes?)',
+                r'(\d+)\s*min\b',  # Simplemente números seguidos de 'min'
+                r'autonomy[:\s]*(\d+)\s*(?:min|minutes?)'
             ]
             
             for pattern in flight_patterns:
-                match = re.search(pattern, page_text)
+                match = re.search(pattern, page_text, re.IGNORECASE)
                 if match:
-                    specs['autonomia_minutos'] = int(match.group(1))
-                    break
+                    try:
+                        specs['autonomia_minutos'] = int(match.group(1))
+                        break
+                    except (ValueError, IndexError):
+                        continue
             
-            # Alcance
+            # Alcance - patrones más amplios
             range_patterns = [
                 r'range[:\s]*(\d+\.?\d*)\s*(km|m|meters?|kilometres?)',
                 r'transmission range[:\s]*(\d+\.?\d*)\s*(km|m)',
-                r'up to\s*(\d+\.?\d*)\s*(km|m)\s*range'
+                r'control range[:\s]*(\d+\.?\d*)\s*(km|m)',
+                r'up to\s*(\d+\.?\d*)\s*(km|m)\s*range',
+                r'(\d+\.?\d*)\s*km\b',  # Simplemente números seguidos de 'km'
+                r'(\d+\.?\d*)\s*m\b(?!\w)'   # Números seguidos de 'm' (no seguido de otras letras)
             ]
             
             for pattern in range_patterns:
-                match = re.search(pattern, page_text)
+                match = re.search(pattern, page_text, re.IGNORECASE)
                 if match:
-                    value, unit = match.groups()
-                    if unit.lower() in ['km', 'kilometres', 'kilometers']:
-                        specs['alcance_metros'] = float(value) * 1000
-                    else:
-                        specs['alcance_metros'] = float(value)
-                    break
+                    try:
+                        if len(match.groups()) == 2:
+                            value, unit = match.groups()
+                        else:
+                            value = match.group(1)
+                            # Determinar unidad por contexto
+                            context = page_text[max(0, match.start()-50):match.end()+50].lower()
+                            unit = 'km' if 'km' in context else 'm'
+                        
+                        value = float(value)
+                        if unit.lower() in ['km', 'kilometres', 'kilometers']:
+                            specs['alcance_metros'] = value * 1000
+                        else:
+                            # Solo aceptar valores de metros que sean razonables (más de 30m)
+                            if value > 30:
+                                specs['alcance_metros'] = value
+                        break
+                    except (ValueError, IndexError):
+                        continue
+            
+            # Velocidad
+            speed_patterns = [
+                r'max speed[:\s]*(\d+\.?\d*)\s*(km/h|kmh|mph)',
+                r'top speed[:\s]*(\d+\.?\d*)\s*(km/h|kmh|mph)',
+                r'(\d+\.?\d*)\s*(km/h|kmh|mph)\s*max',
+                r'(\d+\.?\d*)\s*km/h\b',
+                r'(\d+\.?\d*)\s*mph\b'
+            ]
+            
+            for pattern in speed_patterns:
+                match = re.search(pattern, page_text, re.IGNORECASE)
+                if match:
+                    try:
+                        if len(match.groups()) == 2:
+                            value, unit = match.groups()
+                        else:
+                            value = match.group(1)
+                            unit = 'km/h' if 'km' in match.group(0) else 'mph'
+                        
+                        value = float(value)
+                        if 'mph' in unit.lower():
+                            specs['velocidad_max_kmh'] = value * 1.60934
+                        else:
+                            specs['velocidad_max_kmh'] = value
+                        break
+                    except (ValueError, IndexError):
+                        continue
         
         return specs
     
     def _extract_camera_specs(self, soup: BeautifulSoup, selectors: Dict) -> Dict:
         """Extraer especificaciones de cámara"""
+        import re
+        
         camera = {
             'resolucion_video': None,
             'fps_max': None,
@@ -645,38 +695,73 @@ class DroneScraperOrchestrator:
         
         # Buscar sección de cámara
         camera_section = soup.select_one(selectors.get('camera_section', '.camera-specs'))
-        if camera_section:
-            # Buscar resolución de video
-            for elem in camera_section.select('*'):
-                text = elem.text.lower()
-                if '4k' in text:
+        page_text = soup.get_text()
+        
+        # Buscar resolución de video en toda la página
+        video_patterns = [
+            r'4K\b',
+            r'6K\b', 
+            r'8K\b',
+            r'1080p\b',
+            r'720p\b',
+            r'Ultra HD',
+            r'Full HD'
+        ]
+        
+        for pattern in video_patterns:
+            match = re.search(pattern, page_text, re.IGNORECASE)
+            if match:
+                resolution = match.group(0).upper()
+                if resolution in ['4K', '6K', '8K', '1080P', '720P']:
+                    camera['resolucion_video'] = resolution
+                elif 'ULTRA HD' in resolution:
                     camera['resolucion_video'] = '4K'
-                elif '6k' in text:
-                    camera['resolucion_video'] = '6K'
-                elif '8k' in text:
-                    camera['resolucion_video'] = '8K'
-                elif '1080p' in text:
+                elif 'FULL HD' in resolution:
                     camera['resolucion_video'] = '1080p'
-                
-                # FPS
-                if 'fps' in text or 'frames' in text:
-                    fps = self.data_cleaner.extract_number(text, 'fps')
-                    if fps:
+                break
+        
+        # Buscar FPS
+        fps_patterns = [
+            r'(\d+)\s*fps',
+            r'(\d+)\s*frames per second',
+            r'at\s*(\d+)\s*fps'
+        ]
+        
+        for pattern in fps_patterns:
+            match = re.search(pattern, page_text, re.IGNORECASE)
+            if match:
+                try:
+                    fps = int(match.group(1))
+                    if fps <= 120:  # Valores razonables
                         camera['fps_max'] = fps
-                
-                # Estabilización
-                if 'gimbal' in text or 'estabilización' in text:
-                    if 'mechanical' in text or 'mecánica' in text:
-                        camera['estabilizacion'] = 'mecanica'
-                    elif 'digital' in text:
-                        camera['estabilizacion'] = 'digital'
-                    elif 'hybrid' in text or 'híbrida' in text:
-                        camera['estabilizacion'] = 'hibrida'
+                        break
+                except ValueError:
+                    continue
+        
+        # Buscar estabilización
+        stabilization_patterns = [
+            r'gimbal',
+            r'stabilization',
+            r'stabilized',
+            r'mechanical\s*gimbal',
+            r'3-axis\s*gimbal'
+        ]
+        
+        for pattern in stabilization_patterns:
+            match = re.search(pattern, page_text, re.IGNORECASE)
+            if match:
+                if 'mechanical' in match.group(0).lower() or 'gimbal' in match.group(0).lower():
+                    camera['estabilizacion'] = 'mecanica'
+                else:
+                    camera['estabilizacion'] = 'digital'
+                break
         
         return camera
     
     def _extract_flight_features(self, soup: BeautifulSoup, selectors: Dict) -> Dict:
         """Extraer características de vuelo"""
+        import re
+        
         features = {
             'evita_obstaculos': False,
             'retorno_automatico': False,
@@ -686,24 +771,90 @@ class DroneScraperOrchestrator:
             'precision_hover': None
         }
         
-        # Buscar sección de características
-        features_section = soup.select_one(selectors.get('features_section', '.features'))
-        if features_section:
-            features_text = features_section.text.lower()
-            
-            # Detección de características por palabras clave
-            if 'obstacle' in features_text or 'obstáculo' in features_text:
+        # Buscar en toda la página
+        page_text = soup.get_text()
+        
+        # Patrones para detección de características
+        obstacle_patterns = [
+            r'obstacle\s+(?:avoidance|detection)',
+            r'collision\s+avoidance',
+            r'anti-collision',
+            r'evita\s+obstáculos',
+            r'detección\s+de\s+obstáculos'
+        ]
+        
+        for pattern in obstacle_patterns:
+            if re.search(pattern, page_text, re.IGNORECASE):
                 features['evita_obstaculos'] = True
-            if 'return home' in features_text or 'retorno' in features_text:
+                break
+        
+        # Return to home
+        rth_patterns = [
+            r'return\s+(?:to\s+)?home',
+            r'RTH',
+            r'retorno\s+(?:a\s+)?casa',
+            r'retorno\s+automático',
+            r'auto\s+return'
+        ]
+        
+        for pattern in rth_patterns:
+            if re.search(pattern, page_text, re.IGNORECASE):
                 features['retorno_automatico'] = True
-            if 'follow' in features_text or 'tracking' in features_text or 'seguimiento' in features_text:
+                break
+        
+        # Seguimiento de objetos
+        tracking_patterns = [
+            r'(?:object|subject)\s+tracking',
+            r'follow\s+me',
+            r'activetrack',
+            r'seguimiento\s+(?:de\s+)?objetos?',
+            r'rastreo\s+(?:de\s+)?objetos?'
+        ]
+        
+        for pattern in tracking_patterns:
+            if re.search(pattern, page_text, re.IGNORECASE):
                 features['seguimiento_objeto'] = True
-            if 'night' in features_text or 'nocturno' in features_text:
+                break
+        
+        # Vuelo nocturno
+        night_patterns = [
+            r'night\s+(?:flight|mode)',
+            r'low\s+light',
+            r'vuelo\s+nocturno',
+            r'modo\s+nocturno'
+        ]
+        
+        for pattern in night_patterns:
+            if re.search(pattern, page_text, re.IGNORECASE):
                 features['vuelo_nocturno'] = True
-            if 'sport' in features_text:
+                break
+        
+        # Modo sport
+        sport_patterns = [
+            r'sport\s+mode',
+            r'high\s+speed\s+mode',
+            r'modo\s+deportivo',
+            r'modo\s+sport'
+        ]
+        
+        for pattern in sport_patterns:
+            if re.search(pattern, page_text, re.IGNORECASE):
                 features['modo_sport'] = True
-            if 'hover' in features_text:
-                features['precision_hover'] = 'GPS/GLONASS'
+                break
+        
+        # Precisión de hover
+        hover_patterns = [
+            r'GPS',
+            r'GLONASS',
+            r'precision\s+hover',
+            r'hover\s+accuracy',
+            r'posicionamiento\s+GPS'
+        ]
+        
+        for pattern in hover_patterns:
+            if re.search(pattern, page_text, re.IGNORECASE):
+                features['precision_hover'] = 'GPS'
+                break
         
         return features
     

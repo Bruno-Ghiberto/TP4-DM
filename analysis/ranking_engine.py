@@ -53,10 +53,9 @@ class DroneRankingEngine:
                 'camera_quality': 0.15
             },
             'value': {
-                'price': 0.40,
-                'features': 0.25,
-                'performance': 0.20,
-                'durability': 0.15
+                'features': 0.35,
+                'performance': 0.30,
+                'durability': 0.35
             },
             'professional': {
                 'camera_quality': 0.35,
@@ -71,28 +70,24 @@ class DroneRankingEngine:
         return {
             UseCase.BEGINNER_RECREATIONAL: {
                 'name': 'Principiante Recreativo',
-                'budget_range': (100, 500),
                 'required_features': ['retorno_automatico'],
                 'nice_to_have': ['evita_obstaculos', 'modo_sport'],
                 'weights': {
-                    'ease_of_use': 0.35,
-                    'price': 0.30,
-                    'safety': 0.20,
-                    'fun_factor': 0.15
+                    'ease_of_use': 0.40,
+                    'safety': 0.30,
+                    'fun_factor': 0.30
                 },
                 'min_autonomy': 15,
                 'max_weight': 500
             },
             UseCase.PHOTOGRAPHY_ENTHUSIAST: {
                 'name': 'Entusiasta de Fotografía',
-                'budget_range': (500, 2000),
                 'required_features': ['evita_obstaculos'],
                 'nice_to_have': ['seguimiento_objeto', 'vuelo_nocturno'],
                 'weights': {
-                    'camera_quality': 0.40,
-                    'stability': 0.25,
-                    'autonomy': 0.20,
-                    'portability': 0.15
+                    'camera_quality': 0.45,
+                    'stability': 0.30,
+                    'autonomy': 0.25
                 },
                 'min_camera': '4K',
                 'min_autonomy': 25
@@ -397,78 +392,64 @@ class DroneRankingEngine:
         
         return candidates
     
-    def price_tier_analysis(self) -> Dict[str, List[Dict]]:
+    def performance_tier_analysis(self) -> Dict[str, List[Dict]]:
         """
-        Analizar drones por niveles de precio
+        Analizar drones por niveles de rendimiento
         
         Returns:
-            Diccionario con análisis por tier de precio
+            Diccionario con análisis por tier de rendimiento
         """
         tiers = {
-            'budget': {
-                'range': (0, 500),
-                'description': 'Entrada - Ideal para principiantes',
+            'basic': {
+                'range': (0, 40),
+                'description': 'Básico - Funcionalidades esenciales',
                 'drones': []
             },
-            'mid_range': {
-                'range': (500, 1500),
-                'description': 'Intermedio - Para entusiastas',
+            'intermediate': {
+                'range': (40, 60),
+                'description': 'Intermedio - Buen equilibrio de características',
                 'drones': []
             },
-            'high_end': {
-                'range': (1500, 3000),
-                'description': 'Avanzado - Para uso semi-profesional',
+            'advanced': {
+                'range': (60, 80),
+                'description': 'Avanzado - Características premium',
                 'drones': []
             },
             'professional': {
-                'range': (3000, 10000),
-                'description': 'Profesional - Para trabajo comercial',
-                'drones': []
-            },
-            'enterprise': {
-                'range': (10000, float('inf')),
-                'description': 'Enterprise - Soluciones industriales',
+                'range': (80, 100),
+                'description': 'Profesional - Máximo rendimiento',
                 'drones': []
             }
         }
         
+        # Asegurar que tenemos performance_score
+        if 'performance_score' not in self.drones_df.columns:
+            self.calculate_versatility_score_for_all()
+        
         for tier_name, tier_info in tiers.items():
-            min_price, max_price = tier_info['range']
+            min_score, max_score = tier_info['range']
             
             # Filtrar drones en este tier
             tier_drones = self.drones_df[
-                (self.drones_df['precio_usd'] >= min_price) & 
-                (self.drones_df['precio_usd'] < max_price)
+                (self.drones_df['performance_score'] >= min_score) & 
+                (self.drones_df['performance_score'] < max_score)
             ].copy()
             
             if len(tier_drones) > 0:
-                # Calcular versatilidad para ranking dentro del tier
-                tier_drones['versatility_score'] = tier_drones.apply(
-                    lambda row: self.calculate_versatility_score({
-                        'evita_obstaculos': row.get('caracteristicas_vuelo_evita_obstaculos', False),
-                        'retorno_automatico': row.get('caracteristicas_vuelo_retorno_automatico', False),
-                        'seguimiento_objeto': row.get('caracteristicas_vuelo_seguimiento_objeto', False),
-                        'vuelo_nocturno': row.get('caracteristicas_vuelo_vuelo_nocturno', False),
-                        'modo_sport': row.get('caracteristicas_vuelo_modo_sport', False),
-                        'camara_resolucion': row.get('camara_resolucion_video'),
-                        'gimbal_estabilizacion': row.get('camara_estabilizacion'),
-                        'zoom_optico': row.get('camara_zoom_optico', 0)
-                    }),
-                    axis=1
-                )
+                # Ordenar por score de versatilidad
+                tier_drones = tier_drones.sort_values('performance_score', ascending=False)
                 
                 # Top 5 del tier
-                top_drones = tier_drones.nlargest(5, 'versatility_score')
+                top_drones = tier_drones.head(5)
                 
                 tier_info['drones'] = top_drones[
-                    ['modelo', 'marca', 'precio_usd', 'versatility_score']
+                    ['modelo', 'marca', 'performance_score']
                 ].to_dict('records')
                 
                 # Estadísticas del tier
                 tier_info['stats'] = {
                     'count': len(tier_drones),
-                    'avg_price': float(tier_drones['precio_usd'].mean()),
-                    'avg_versatility': float(tier_drones['versatility_score'].mean()),
+                    'avg_performance': float(tier_drones['performance_score'].mean()),
                     'brands': tier_drones['marca'].value_counts().to_dict()
                 }
                 
@@ -478,8 +459,7 @@ class DroneRankingEngine:
                     tier_info['best_choice'] = {
                         'modelo': best['modelo'],
                         'marca': best['marca'],
-                        'precio': float(best['precio_usd']),
-                        'score': float(best['versatility_score'])
+                        'score': float(best['performance_score'])
                     }
         
         return tiers
@@ -517,7 +497,7 @@ class DroneRankingEngine:
                 },
                 'scores': {
                     'name': 'Puntuaciones',
-                    'attributes': ['versatility_score', 'price_performance_ratio']
+                    'attributes': ['versatility_score', 'performance_score']
                 }
             }
         }
@@ -528,7 +508,6 @@ class DroneRankingEngine:
                 'id': idx,
                 'modelo': drone.get('modelo'),
                 'marca': drone.get('marca'),
-                'precio': float(drone.get('precio_usd', 0)),
                 'imagen': f"/assets/drone_icons/{drone.get('marca', 'generic').lower()}.png",
                 'attributes': {}
             }
@@ -565,7 +544,7 @@ class DroneRankingEngine:
             })
             
             drone_data['attributes']['versatility_score'] = f"{versatility:.1f}/100"
-            drone_data['attributes']['price_performance_ratio'] = f"{drone.get('price_performance_ratio', 0):.2f}"
+            drone_data['attributes']['performance_score'] = f"{drone.get('performance_score', 0):.1f}"
             
             comparison['drones'].append(drone_data)
         

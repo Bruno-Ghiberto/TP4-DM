@@ -22,7 +22,7 @@ class FocusedDroneAnalyzer:
             'timestamp': datetime.now().isoformat(),
             'total_analyzed': 0,
             'market_segments': {},
-            'price_performance': {},
+            'performance_analysis': {},
             'recommendations': {},
             'insights': []
         }
@@ -45,12 +45,12 @@ class FocusedDroneAnalyzer:
             logger.error(f"Error cargando datos: {str(e)}")
             raise
     
-    def calculate_price_performance_ratio(self) -> pd.Series:
+    def calculate_performance_score(self) -> pd.Series:
         """
-        Calcular ratio precio/rendimiento para cada drone
+        Calcular score de rendimiento para cada drone
         
         Returns:
-            Serie con ratios precio/rendimiento
+            Serie con scores de rendimiento
         """
         # Crear copia para cálculos
         df = self.drones_df.copy()
@@ -118,42 +118,28 @@ class FocusedDroneAnalyzer:
             df['norm_features'] * performance_weights['features']
         ) * 100
         
-        # Calcular ratio precio/rendimiento
-        if 'precio_usd' in df.columns:
-            # Evitar división por cero
-            df['price_performance_ratio'] = df.apply(
-                lambda row: row['performance_score'] / row['precio_usd'] * 1000 
-                if pd.notna(row['precio_usd']) and row['precio_usd'] > 0 
-                else np.nan,
-                axis=1
-            )
-        else:
-            df['price_performance_ratio'] = np.nan
-        
         # Guardar resultados
-        self.analysis_results['price_performance'] = {
-            'best_value': df.nlargest(5, 'price_performance_ratio')[['modelo', 'marca', 'precio_usd', 'price_performance_ratio']].to_dict('records'),
-            'worst_value': df.nsmallest(5, 'price_performance_ratio')[['modelo', 'marca', 'precio_usd', 'price_performance_ratio']].to_dict('records'),
-            'average_ratio': float(df['price_performance_ratio'].mean())
+        self.analysis_results['performance_scores'] = {
+            'best_performance': df.nlargest(5, 'performance_score')[['modelo', 'marca', 'performance_score']].to_dict('records'),
+            'worst_performance': df.nsmallest(5, 'performance_score')[['modelo', 'marca', 'performance_score']].to_dict('records'),
+            'average_score': float(df['performance_score'].mean())
         }
         
         # Agregar insight
-        best_drone = df.loc[df['price_performance_ratio'].idxmax()]
+        best_drone = df.loc[df['performance_score'].idxmax()]
         self.analysis_results['insights'].append({
-            'tipo': 'mejor_valor',
-            'mensaje': f"El {best_drone['modelo']} ofrece la mejor relación precio/rendimiento con un ratio de {best_drone['price_performance_ratio']:.2f}",
+            'tipo': 'mejor_rendimiento',
+            'mensaje': f"El {best_drone['modelo']} tiene el mejor score de rendimiento con {best_drone['performance_score']:.2f} puntos",
             'datos': {
                 'modelo': best_drone['modelo'],
-                'precio': best_drone.get('precio_usd', 'N/A'),
                 'performance_score': best_drone['performance_score']
             }
         })
         
         # Actualizar DataFrame con nuevas métricas
         self.drones_df['performance_score'] = df['performance_score']
-        self.drones_df['price_performance_ratio'] = df['price_performance_ratio']
         
-        return df['price_performance_ratio']
+        return df['performance_score']
     
     def identify_market_segments(self) -> Dict[str, List[str]]:
         """
@@ -164,31 +150,27 @@ class FocusedDroneAnalyzer:
         """
         segments = {
             'entry_level': {
-                'criteria': lambda df: (df['precio_usd'] < 500) & (df['clasificacion_categoria_peso'] == 'ultra_ligero'),
-                'description': 'Drones económicos para principiantes',
+                'criteria': lambda df: df['clasificacion_categoria_peso'] == 'ultra_ligero',
+                'description': 'Drones ultraligeros para principiantes',
                 'models': []
             },
             'hobbyist': {
-                'criteria': lambda df: (df['precio_usd'].between(300, 1000)) & 
-                                     (df['clasificacion_categoria_peso'].isin(['ligero', 'medio'])),
+                'criteria': lambda df: df['clasificacion_categoria_peso'].isin(['ligero', 'medio']),
                 'description': 'Drones para entusiastas y hobby',
                 'models': []
             },
             'prosumer': {
-                'criteria': lambda df: (df['precio_usd'].between(800, 2500)) & 
-                                     (df['camara_resolucion_video'].isin(['4K', '6K'])),
+                'criteria': lambda df: df['camara_resolucion_video'].isin(['4K', '6K']),
                 'description': 'Drones semiprofesionales con buenas cámaras',
                 'models': []
             },
             'professional': {
-                'criteria': lambda df: (df['precio_usd'] > 2000) & 
-                                     (df['camara_resolucion_video'].isin(['6K', '8K'])),
+                'criteria': lambda df: df['camara_resolucion_video'].isin(['6K', '8K']),
                 'description': 'Drones profesionales para trabajo comercial',
                 'models': []
             },
             'industrial': {
-                'criteria': lambda df: (df['clasificacion_categoria_peso'] == 'pesado') & 
-                                     (df['precio_usd'] > 3000),
+                'criteria': lambda df: df['clasificacion_categoria_peso'] == 'pesado',
                 'description': 'Drones industriales para aplicaciones especializadas',
                 'models': []
             },
@@ -206,22 +188,17 @@ class FocusedDroneAnalyzer:
                 mask = segment_info['criteria'](self.drones_df)
                 segment_drones = self.drones_df[mask]
                 
-                segment_info['models'] = segment_drones[['modelo', 'marca', 'precio_usd']].to_dict('records')
+                segment_info['models'] = segment_drones[['modelo', 'marca']].to_dict('records')
                 
                 # Estadísticas del segmento
                 if len(segment_drones) > 0:
                     segment_stats = {
                         'count': len(segment_drones),
-                        'avg_price': float(segment_drones['precio_usd'].mean()),
-                        'price_range': (float(segment_drones['precio_usd'].min()), 
-                                      float(segment_drones['precio_usd'].max())),
                         'top_brands': segment_drones['marca'].value_counts().to_dict()
                     }
                 else:
                     segment_stats = {
                         'count': 0,
-                        'avg_price': 0,
-                        'price_range': (0, 0),
                         'top_brands': {}
                     }
                 
@@ -270,8 +247,8 @@ class FocusedDroneAnalyzer:
                     if pd.notna(category_value):
                         category_df = self.drones_df[self.drones_df[column_name] == category_value]
                         
-                        if 'price_performance_ratio' in category_df.columns:
-                            best_drone_idx = category_df['price_performance_ratio'].idxmax()
+                        if 'performance_score' in category_df.columns:
+                            best_drone_idx = category_df['performance_score'].idxmax()
                             
                             if pd.notna(best_drone_idx):
                                 best_drone = category_df.loc[best_drone_idx]
@@ -279,8 +256,7 @@ class FocusedDroneAnalyzer:
                                 category_best[category_value] = {
                                     'modelo': best_drone['modelo'],
                                     'marca': best_drone['marca'],
-                                    'precio': float(best_drone['precio_usd']) if pd.notna(best_drone['precio_usd']) else None,
-                                    'ratio': float(best_drone['price_performance_ratio']) if pd.notna(best_drone['price_performance_ratio']) else None,
+                                    'performance_score': float(best_drone['performance_score']) if pd.notna(best_drone['performance_score']) else None,
                                     'autonomia': float(best_drone.get('especificaciones_tecnicas_autonomia_minutos', 0)),
                                     'alcance': float(best_drone.get('especificaciones_tecnicas_alcance_metros', 0))
                                 }
@@ -306,7 +282,6 @@ class FocusedDroneAnalyzer:
         
         Args:
             user_profile: Dict con preferencias del usuario
-                - budget_max: presupuesto máximo
                 - experience_level: nivel de experiencia
                 - primary_use: uso principal
                 - must_have_features: características requeridas
@@ -316,9 +291,8 @@ class FocusedDroneAnalyzer:
         """
         recommendations = []
         
-        # Filtrar por presupuesto
-        budget_max = user_profile.get('budget_max', float('inf'))
-        candidates = self.drones_df[self.drones_df['precio_usd'] <= budget_max].copy()
+        # Usar todos los drones como candidatos
+        candidates = self.drones_df.copy()
         
         # Filtrar por nivel de experiencia
         experience_level = user_profile.get('experience_level')
@@ -355,44 +329,38 @@ class FocusedDroneAnalyzer:
             # Factores de scoring personalizados según uso
             use_weights = {
                 'recreativo': {
-                    'precio': 0.4,
-                    'facilidad': 0.3,
-                    'autonomia': 0.2,
-                    'features': 0.1
+                    'facilidad': 0.4,
+                    'autonomia': 0.3,
+                    'features': 0.3
                 },
                 'fotografia': {
-                    'camara': 0.4,
-                    'estabilidad': 0.2,
-                    'autonomia': 0.2,
-                    'precio': 0.2
+                    'camara': 0.5,
+                    'estabilidad': 0.25,
+                    'autonomia': 0.25
                 },
                 'video_profesional': {
-                    'camara': 0.35,
-                    'estabilidad': 0.25,
-                    'autonomia': 0.2,
-                    'alcance': 0.2
+                    'camara': 0.4,
+                    'estabilidad': 0.3,
+                    'autonomia': 0.15,
+                    'alcance': 0.15
                 },
                 'inspeccion': {
-                    'alcance': 0.3,
-                    'autonomia': 0.3,
-                    'camara': 0.2,
-                    'seguridad': 0.2
+                    'alcance': 0.35,
+                    'autonomia': 0.35,
+                    'camara': 0.15,
+                    'seguridad': 0.15
                 }
             }
             
             weights = use_weights.get(primary_use, {
-                'precio': 0.25,
-                'camara': 0.25,
-                'autonomia': 0.25,
-                'features': 0.25
+                'camara': 0.3,
+                'autonomia': 0.3,
+                'alcance': 0.2,
+                'features': 0.2
             })
             
             # Calcular scores
             candidates['recommendation_score'] = 0
-            
-            # Score por precio (inverso - menor precio mejor)
-            if 'precio' in weights and candidates['precio_usd'].max() > 0:
-                candidates['recommendation_score'] += weights['precio'] * (1 - candidates['precio_usd'] / candidates['precio_usd'].max())
             
             # Score por cámara
             if 'camara' in weights and 'camara_resolucion_video' in candidates.columns:
@@ -423,7 +391,6 @@ class FocusedDroneAnalyzer:
                     'rank': len(recommendations) + 1,
                     'modelo': drone['modelo'],
                     'marca': drone['marca'],
-                    'precio': float(drone['precio_usd']) if pd.notna(drone['precio_usd']) else None,
                     'score': float(drone['recommendation_score']),
                     'reasons': [],
                     'specs': {
@@ -435,8 +402,8 @@ class FocusedDroneAnalyzer:
                 }
                 
                 # Agregar razones de recomendación
-                if drone.get('price_performance_ratio', 0) > self.drones_df['price_performance_ratio'].mean():
-                    recommendation['reasons'].append('Excelente relación precio/rendimiento')
+                if drone.get('performance_score', 0) > self.drones_df['performance_score'].mean():
+                    recommendation['reasons'].append('Excelente score de rendimiento')
                 
                 if drone.get('camara_resolucion_video') in ['4K', '6K', '8K']:
                     recommendation['reasons'].append(f'Cámara de alta calidad ({drone["camara_resolucion_video"]})')
@@ -450,7 +417,7 @@ class FocusedDroneAnalyzer:
                 recommendations.append(recommendation)
         
         # Guardar recomendaciones en resultados
-        profile_key = f"{experience_level}_{primary_use}_{budget_max}"
+        profile_key = f"{experience_level}_{primary_use}"
         self.analysis_results['recommendations'][profile_key] = {
             'profile': user_profile,
             'recommendations': recommendations,
@@ -459,8 +426,8 @@ class FocusedDroneAnalyzer:
         
         return recommendations
     
-    def analyze_price_trends(self) -> Dict[str, Any]:
-        """Analizar tendencias de precio por marca y categoría"""
+    def analyze_performance_trends(self) -> Dict[str, Any]:
+        """Analizar tendencias de rendimiento por marca y categoría"""
         trends = {
             'by_brand': {},
             'by_category': {},
@@ -471,12 +438,11 @@ class FocusedDroneAnalyzer:
         for brand in self.drones_df['marca'].unique():
             brand_df = self.drones_df[self.drones_df['marca'] == brand]
             
-            if 'precio_usd' in brand_df.columns:
+            if 'performance_score' in brand_df.columns:
                 trends['by_brand'][brand] = {
-                    'avg_price': float(brand_df['precio_usd'].mean()),
-                    'min_price': float(brand_df['precio_usd'].min()),
-                    'max_price': float(brand_df['precio_usd'].max()),
-                    'price_range': float(brand_df['precio_usd'].max() - brand_df['precio_usd'].min()),
+                    'avg_performance': float(brand_df['performance_score'].mean()),
+                    'min_performance': float(brand_df['performance_score'].min()),
+                    'max_performance': float(brand_df['performance_score'].max()),
                     'model_count': len(brand_df)
                 }
         
@@ -486,36 +452,36 @@ class FocusedDroneAnalyzer:
                 if pd.notna(category):
                     category_df = self.drones_df[self.drones_df['clasificacion_categoria_peso'] == category]
                     
-                    if 'precio_usd' in category_df.columns and len(category_df) > 0:
+                    if 'performance_score' in category_df.columns and len(category_df) > 0:
                         trends['by_category'][category] = {
-                            'avg_price': float(category_df['precio_usd'].mean()),
-                            'min_price': float(category_df['precio_usd'].min()),
-                            'max_price': float(category_df['precio_usd'].max()),
+                            'avg_performance': float(category_df['performance_score'].mean()),
+                            'min_performance': float(category_df['performance_score'].min()),
+                            'max_performance': float(category_df['performance_score'].max()),
                             'model_count': len(category_df)
                         }
         
         # Tendencias generales
-        if 'precio_usd' in self.drones_df.columns:
+        if 'performance_score' in self.drones_df.columns:
             trends['overall'] = {
-                'avg_price': float(self.drones_df['precio_usd'].mean()),
-                'median_price': float(self.drones_df['precio_usd'].median()),
-                'price_std': float(self.drones_df['precio_usd'].std()),
+                'avg_performance': float(self.drones_df['performance_score'].mean()),
+                'median_performance': float(self.drones_df['performance_score'].median()),
+                'performance_std': float(self.drones_df['performance_score'].std()),
                 'total_models': len(self.drones_df)
             }
         
-        self.analysis_results['price_trends'] = trends
+        self.analysis_results['performance_trends'] = trends
         
-        # Agregar insight sobre marca más cara/barata
+        # Agregar insight sobre marca con mejor/peor rendimiento
         if trends['by_brand']:
-            most_expensive_brand = max(trends['by_brand'].items(), key=lambda x: x[1]['avg_price'])
-            cheapest_brand = min(trends['by_brand'].items(), key=lambda x: x[1]['avg_price'])
+            best_performance_brand = max(trends['by_brand'].items(), key=lambda x: x[1]['avg_performance'])
+            worst_performance_brand = min(trends['by_brand'].items(), key=lambda x: x[1]['avg_performance'])
             
             self.analysis_results['insights'].append({
-                'tipo': 'precio_marcas',
-                'mensaje': f"{most_expensive_brand[0]} es la marca más cara (promedio ${most_expensive_brand[1]['avg_price']:.0f}), mientras que {cheapest_brand[0]} es la más económica (promedio ${cheapest_brand[1]['avg_price']:.0f})",
+                'tipo': 'rendimiento_marcas',
+                'mensaje': f"{best_performance_brand[0]} tiene el mejor rendimiento promedio ({best_performance_brand[1]['avg_performance']:.1f} puntos), mientras que {worst_performance_brand[0]} tiene el menor ({worst_performance_brand[1]['avg_performance']:.1f} puntos)",
                 'datos': {
-                    'mas_cara': most_expensive_brand,
-                    'mas_economica': cheapest_brand
+                    'mejor_rendimiento': best_performance_brand,
+                    'menor_rendimiento': worst_performance_brand
                 }
             })
         
@@ -682,8 +648,8 @@ def main():
     analyzer.load_data()
     
     # Ejecutar análisis completo
-    logger.info("Calculando ratio precio/rendimiento...")
-    analyzer.calculate_price_performance_ratio()
+    logger.info("Calculando scores de rendimiento...")
+    analyzer.calculate_performance_score()
     
     logger.info("Identificando segmentos de mercado...")
     analyzer.identify_market_segments()
@@ -691,8 +657,8 @@ def main():
     logger.info("Encontrando mejores valores por categoría...")
     analyzer.find_best_value_by_category()
     
-    logger.info("Analizando tendencias de precio...")
-    analyzer.analyze_price_trends()
+    logger.info("Analizando tendencias de rendimiento...")
+    analyzer.analyze_performance_trends()
     
     logger.info("Calculando adopción de características...")
     analyzer.calculate_feature_adoption()
@@ -700,19 +666,16 @@ def main():
     # Ejemplo de recomendación personalizada
     test_profiles = [
         {
-            'budget_max': 500,
             'experience_level': 'principiante',
             'primary_use': 'recreativo',
             'must_have_features': ['retorno_automatico']
         },
         {
-            'budget_max': 2000,
             'experience_level': 'intermedio',
             'primary_use': 'fotografia',
             'must_have_features': ['evita_obstaculos', 'seguimiento_objeto']
         },
         {
-            'budget_max': 5000,
             'experience_level': 'profesional',
             'primary_use': 'video_profesional',
             'must_have_features': ['evita_obstaculos', 'modo_sport']
@@ -720,11 +683,11 @@ def main():
     ]
     
     for profile in test_profiles:
-        logger.info(f"\nGenerando recomendaciones para perfil: {profile['primary_use']} - ${profile['budget_max']}")
+        logger.info(f"\nGenerando recomendaciones para perfil: {profile['primary_use']} - {profile['experience_level']}")
         recommendations = analyzer.generate_buying_recommendations(profile)
         
         for rec in recommendations[:3]:
-            logger.info(f"  {rec['rank']}. {rec['modelo']} (${rec['precio']}) - Score: {rec['score']:.1f}")
+            logger.info(f"  {rec['rank']}. {rec['modelo']} - Score: {rec['score']:.1f}")
     
     # Guardar resultados
     analyzer.save_results()

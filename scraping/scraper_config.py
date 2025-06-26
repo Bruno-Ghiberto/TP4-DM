@@ -25,7 +25,6 @@ SCRAPER_CONFIG = {
             'product_list': '.product-list-item, .product-card, .hero-product',
             'product_link': 'a[href*="/"], a.product-link',
             'product_name': 'h1, .style__visual-hidden___32pnD, .product-title, .hero-product-name, .page-title, .product-name h1, [class*="title"]',
-            'price': '.price-current, .product-price, .price, .hero-price, [data-price], [class*="price"]',
             'specs_table': '.specs-table, .specifications-table, .product-specs, .tech-specs, table',
             'camera_section': '.camera-specs, .gimbal-camera, [data-section="camera"], .imaging-specs',
             'features_section': '.features-list, .product-features, .intelligent-features, .key-features'
@@ -64,7 +63,6 @@ SCRAPER_CONFIG = {
             'product_list': '.product-item, .drone-card, .product-box, .product-detail',
             'product_link': 'a.product-link, a[href*="/productdetail/"]',
             'product_name': 'h1, h2, .product-name, .product-title, .page-title, .product-detail-title, [class*="title"]',
-            'price': '.price, .product-price-value, .current-price, .price-display, [class*="price"]',
             'specs_table': '.specifications, .specs-content, .product-parameters, .tech-specs, table',
             'camera_section': '.camera-parameters, .payload-specs, .imaging-system',
             'features_section': '.features, .product-highlights, .key-features'
@@ -92,7 +90,6 @@ SCRAPER_CONFIG = {
             'product_list': '.product-item, .drone-item, article.product',
             'product_link': 'a[href*="/drones/"], a.product-url',
             'product_name': 'h1.product__title, h1[itemprop="name"], .product-name',
-            'price': '.product__price, .price-now, [itemprop="price"]',
             'specs_table': '.product__specs, .technical-specs, .specifications',
             'camera_section': '.camera-specs, .imaging-system',
             'features_section': '.product__features, .key-features'

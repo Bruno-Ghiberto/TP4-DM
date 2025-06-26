@@ -284,9 +284,9 @@ class DataCleaner:
         if 'especificaciones_tecnicas' in drone_data:
             specs = drone_data['especificaciones_tecnicas']
             
-            # Al menos 3 especificaciones deben tener valor
-            spec_count = sum(1 for v in specs.values() if v is not None)
-            if spec_count < 3:
+            # Al menos 1 especificación debe tener valor (más permisivo)
+            spec_count = sum(1 for v in specs.values() if v is not None and v != "")
+            if spec_count < 1:
                 issues.append(f"Pocas especificaciones válidas: {spec_count}/6")
             
             # Validar rangos
@@ -302,16 +302,11 @@ class DataCleaner:
                 if specs['alcance_metros'] < 30 or specs['alcance_metros'] > 20000:
                     issues.append(f"Alcance fuera de rango: {specs['alcance_metros']}m")
         
-        # Validar precio si existe
-        if 'precio' in drone_data and drone_data['precio'].get('usd'):
-            precio = drone_data['precio']['usd']
-            if precio < 50 or precio > 50000:
-                issues.append(f"Precio fuera de rango: ${precio}")
-        
         # Validar marca
         if 'marca' in drone_data:
-            marcas_validas = ['DJI', 'Autel', 'Parrot']
-            if drone_data['marca'] not in marcas_validas:
+            marca_normalizada = drone_data['marca'].lower()
+            marcas_validas = ['dji', 'autel', 'parrot']
+            if marca_normalizada not in marcas_validas:
                 issues.append(f"Marca no válida: {drone_data['marca']}")
         
         is_valid = len(issues) == 0
@@ -353,7 +348,6 @@ class DataCleaner:
         
         # Asegurar tipos de datos correctos
         numeric_columns = [
-            'precio_usd',
             'especificaciones_tecnicas_peso_gramos',
             'especificaciones_tecnicas_autonomia_minutos',
             'especificaciones_tecnicas_alcance_metros',
@@ -368,7 +362,6 @@ class DataCleaner:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         
         # Llenar valores faltantes con defaults apropiados
-        df['precio_usd'] = df.get('precio_usd', np.nan)
         df['especificaciones_tecnicas_peso_gramos'] = df.get('especificaciones_tecnicas_peso_gramos', np.nan)
         
         # Agregar timestamp de procesamiento
@@ -402,20 +395,6 @@ class DataCleaner:
                         drone['especificaciones_tecnicas']
                     )
                 
-                # Normalizar precio
-                if 'precio' in drone:
-                    if isinstance(drone['precio'], dict):
-                        if 'usd' in drone['precio'] and isinstance(drone['precio']['usd'], str):
-                            drone['precio']['usd'] = self.normalize_price_formats(
-                                drone['precio']['usd']
-                            )
-                    elif isinstance(drone['precio'], str):
-                        drone['precio'] = {
-                            'usd': self.normalize_price_formats(drone['precio']),
-                            'moneda_local': None,
-                            'fecha_precio': datetime.now().strftime('%Y-%m-%d')
-                        }
-                
                 # Normalizar resolución de video
                 if 'camara' in drone and 'resolucion_video' in drone['camara']:
                     res = str(drone['camara']['resolucion_video']).upper()
@@ -433,16 +412,26 @@ class DataCleaner:
                 # Validar calidad
                 is_valid, issues = self.validate_data_quality(drone)
                 
-                if is_valid:
+                # Aceptar drones aunque tengan algunos problemas si tienen información básica
+                has_basic_info = (
+                    drone.get('modelo') and 
+                    drone.get('marca') and
+                    (drone.get('especificaciones_tecnicas', {}).get('peso_gramos') is not None or
+                     drone.get('especificaciones_tecnicas', {}).get('autonomia_minutos') is not None or
+                     drone.get('camara', {}).get('resolucion_video') is not None)
+                )
+                
+                if has_basic_info:
+                    if not is_valid:
+                        logger.warning(f"Drone {drone.get('modelo', 'Unknown')} tiene problemas menores: {issues}")
+                        # Marcar confiabilidad como media pero incluir
+                        if 'metadata' not in drone:
+                            drone['metadata'] = {}
+                        drone['metadata']['confiabilidad_datos'] = 'media'
+                        drone['metadata']['problemas_calidad'] = issues
                     normalized.append(drone)
                 else:
-                    logger.warning(f"Drone {drone.get('modelo', 'Unknown')} tiene problemas: {issues}")
-                    # Incluir de todos modos pero marcar confiabilidad
-                    if 'metadata' not in drone:
-                        drone['metadata'] = {}
-                    drone['metadata']['confiabilidad_datos'] = 'baja'
-                    drone['metadata']['problemas_calidad'] = issues
-                    normalized.append(drone)
+                    logger.warning(f"Drone {drone.get('modelo', 'Unknown')} rechazado por falta de información básica: {issues}")
                     
             except Exception as e:
                 logger.error(f"Error normalizando drone {drone.get('modelo', 'Unknown')}: {str(e)}")
