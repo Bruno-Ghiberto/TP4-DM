@@ -2,7 +2,7 @@
 #Asegura el cumplimiento de las políticas de scraping de cada sitio
 
 import logging
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Dict, Any
 from urllib.parse import urlparse, urljoin
 from urllib.robotparser import RobotFileParser
 

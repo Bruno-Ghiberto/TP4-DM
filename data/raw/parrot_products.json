@@ -1,0 +1,67 @@
+[
+  {
+    "marca": "parrot",
+    "modelo": "ANAFI Ai",
+    "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-Ai-product-sheet.pdf",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:17:02.046034",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "media",
+      "tipo_fuente": "pdf"
+    },
+    "especificaciones_tecnicas": {
+      "peso_gramos": 898.0,
+      "autonomia_minutos": 32
+    },
+    "camara": {},
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "precision_hover": "GPS"
+    },
+    "precio": {
+      "usd": null,
+      "moneda_local": null,
+      "fecha_precio": null
+    },
+    "clasificacion": {
+      "categoria_peso": "medio",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "parrot",
+    "modelo": "ANAFI USA",
+    "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-USA-product-sheet.pdf",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:17:05.881232",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "media",
+      "tipo_fuente": "pdf"
+    },
+    "especificaciones_tecnicas": {
+      "autonomia_minutos": 32
+    },
+    "camara": {
+      "resolucion_video": "4K"
+    },
+    "caracteristicas_vuelo": {
+      "precision_hover": "GPS"
+    },
+    "precio": {
+      "usd": null,
+      "moneda_local": null,
+      "fecha_precio": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [
+        "fotografia",
+        "video_profesional"
+      ],
+      "certificaciones": []
+    }
+  }
+]

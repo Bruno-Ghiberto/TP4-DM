@@ -1,0 +1,370 @@
+[
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-lite-enterprise-series/",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:15:23.532612",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Lightweight Yet Mighty\n\n              Video",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 7.5,
+      "autonomia_minutos": 2400.0,
+      "alcance_metros": null,
+      "velocidad_max_kmh": 60.0,
+      "resistencia_viento": "37 minutes\n                    Note: Tested in lab with nearly no wind when aircraft hovers and only for reference.",
+      "temperatura_operacion": "-10℃~40℃"
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "ultra_ligero",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [
+        "recreativo"
+      ],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/autel-alpha",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:15:34.683904",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Alpha",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 8400.0,
+      "autonomia_minutos": 40.0,
+      "alcance_metros": 30000.0,
+      "velocidad_max_kmh": 300.0,
+      "resistencia_viento": "38 minutes",
+      "temperatura_operacion": "-20℃ to 50℃"
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-max-4t/",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:15:44.874697",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "EVO Max 4T",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 10.3,
+      "autonomia_minutos": 2520.0,
+      "alcance_metros": 60.0,
+      "velocidad_max_kmh": 300.0,
+      "resistencia_viento": null,
+      "temperatura_operacion": "-20℃ to +50℃ (without load)\n                                                    -20℃ to +40℃ (full load)"
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "ultra_ligero",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [
+        "recreativo"
+      ],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-max-4n/",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:16:11.308748",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "EVO Max 4N",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": 42.0,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-ii-enterprise-drones",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:16:19.133075",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "EVO II Enterprise V3",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 3.0,
+      "autonomia_minutos": 42.0,
+      "alcance_metros": 25000.0,
+      "velocidad_max_kmh": 120.0,
+      "resistencia_viento": "38 min（with strobe）\n\t\t\t\t\t\t29 min（with spotlight）\n\t\t\t\t\t\t34 min（with loudspeaker）\n\t\t\t\t\t\t36 min（with RTK module）",
+      "temperatura_operacion": "-10~40℃"
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "ultra_ligero",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [
+        "recreativo"
+      ],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-ii-dual-640t-drones/",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:16:25.024267",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "EVO II Dual 640T V3",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-ii-rtk-series-drones/",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:16:30.931718",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "EVO II RTK Series V3",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 3.0,
+      "autonomia_minutos": 38.0,
+      "alcance_metros": 25000.0,
+      "velocidad_max_kmh": 120.0,
+      "resistencia_viento": "32 minutes",
+      "temperatura_operacion": "-10~40℃"
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "ultra_ligero",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [
+        "recreativo"
+      ],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-ii-pro-drones/",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:16:36.920480",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "EVO II Pro V3",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 1270.0,
+      "autonomia_minutos": 39.0,
+      "alcance_metros": 25000.0,
+      "velocidad_max_kmh": 120.0,
+      "resistencia_viento": "35 minutes",
+      "temperatura_operacion": "-10~40℃"
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/dragonfish-series-drones/",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:16:49.317845",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Dragonfish Series",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 9000.0,
+      "autonomia_minutos": 107.0,
+      "alcance_metros": null,
+      "velocidad_max_kmh": 0.0,
+      "resistencia_viento": "Fixed Wing Mode：15 m/s\n                              Vertical Flight Mode：12 m/s",
+      "temperatura_operacion": "-20℃ ~40℃"
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  }
+]

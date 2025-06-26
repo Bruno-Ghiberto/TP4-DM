@@ -24,11 +24,16 @@ from robot_checker import RobotChecker
 from scraper_config import SCRAPER_CONFIG
 
 # Configuración de logging
+# Crear directorio de datos si no existe
+log_dir = Path(__file__).parent.parent / 'data'
+log_dir.mkdir(parents=True, exist_ok=True)
+log_file = log_dir / 'extraction_log.json'
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('../data/extraction_log.json'),
+        logging.FileHandler(log_file),
         logging.StreamHandler()
     ]
 )
@@ -122,26 +127,43 @@ class DroneScraperOrchestrator:
         """Scraping de sitios estáticos"""
         products = []
         
-        # Obtener página de productos
+        # Obtener headers apropiados
         headers = self._get_headers()
         
-        for product_list_url in config['product_urls']:
-            async with self.session.get(product_list_url, headers=headers) as response:
-                if response.status == 200:
-                    html = await response.text()
-                    soup = BeautifulSoup(html, 'lxml')
-                    
-                    # Extraer links de productos
-                    product_links = self._extract_product_links(soup, config)
-                    
-                    # Scrapear cada producto
-                    for link in product_links[:config.get('max_products', 50)]:
-                        product_data = await self._scrape_product_page(link, brand, config)
-                        if product_data:
-                            products.append(product_data)
+        # Verificar si las URLs son directas a productos específicos
+        if config.get('direct_product_urls', False):
+            # Scrapear directamente cada URL de producto
+            for product_url in config['product_urls']:
+                # Manejar PDFs especialmente (Parrot)
+                if product_url.endswith('.pdf') and config.get('has_pdf_content', False):
+                    product_data = await self._scrape_pdf_content(product_url, brand, config)
+                else:
+                    product_data = await self._scrape_product_page(product_url, brand, config)
+                
+                if product_data:
+                    products.append(product_data)
+                
+                # Respetar rate limiting
+                await asyncio.sleep(config.get('delay_between_requests', 3))
+        else:
+            # Método original: buscar enlaces en páginas de listado
+            for product_list_url in config['product_urls']:
+                async with self.session.get(product_list_url, headers=headers) as response:
+                    if response.status == 200:
+                        html = await response.text()
+                        soup = BeautifulSoup(html, 'lxml')
                         
-                        # Respetar rate limiting
-                        await asyncio.sleep(config.get('delay_between_requests', 3))
+                        # Extraer links de productos
+                        product_links = self._extract_product_links(soup, config)
+                        
+                        # Scrapear cada producto
+                        for link in product_links[:config.get('max_products', 50)]:
+                            product_data = await self._scrape_product_page(link, brand, config)
+                            if product_data:
+                                products.append(product_data)
+                            
+                            # Respetar rate limiting
+                            await asyncio.sleep(config.get('delay_between_requests', 3))
         
         return products
     
@@ -152,41 +174,68 @@ class DroneScraperOrchestrator:
         self.driver = self.setup_selenium_driver()
         
         try:
-            for product_list_url in config['product_urls']:
-                self.driver.get(product_list_url)
-                
-                # Esperar carga de contenido dinámico
-                wait = WebDriverWait(self.driver, 10)
-                wait.until(EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, config['selectors']['product_list'])
-                ))
-                
-                # Manejar scroll infinito si es necesario
-                if config.get('infinite_scroll', False):
-                    self._handle_infinite_scroll()
-                
-                # Extraer HTML después de JS
-                soup = BeautifulSoup(self.driver.page_source, 'lxml')
-                product_links = self._extract_product_links(soup, config)
-                
-                # Scrapear cada producto
-                for link in product_links[:config.get('max_products', 50)]:
-                    self.driver.get(link)
+            # Verificar si las URLs son directas a productos específicos
+            if config.get('direct_product_urls', False):
+                # Scrapear directamente cada URL de producto
+                for product_url in config['product_urls']:
+                    self.driver.get(product_url)
                     
-                    # Esperar carga completa
-                    wait.until(EC.presence_of_element_located(
-                        (By.CSS_SELECTOR, config['selectors']['product_name'])
-                    ))
+                    # Esperar carga de contenido dinámico
+                    wait = WebDriverWait(self.driver, 15)
+                    try:
+                        wait.until(EC.presence_of_element_located(
+                            (By.CSS_SELECTOR, config['selectors']['product_name'])
+                        ))
+                    except:
+                        # Si no encuentra el selector específico, esperar carga general
+                        wait.until(lambda driver: driver.execute_script("return document.readyState") == "complete")
                     
-                    # Extraer datos
+                    # Extraer datos del producto
                     product_soup = BeautifulSoup(self.driver.page_source, 'lxml')
-                    product_data = self.extract_drone_specs(product_soup, brand, link)
+                    product_data = self.extract_drone_specs(product_soup, brand, product_url)
                     
                     if product_data:
                         products.append(product_data)
                     
                     # Delay entre productos
                     await asyncio.sleep(config.get('delay_between_requests', 3))
+            else:
+                # Método original: buscar enlaces en páginas de listado
+                for product_list_url in config['product_urls']:
+                    self.driver.get(product_list_url)
+                    
+                    # Esperar carga de contenido dinámico
+                    wait = WebDriverWait(self.driver, 10)
+                    wait.until(EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, config['selectors']['product_list'])
+                    ))
+                    
+                    # Manejar scroll infinito si es necesario
+                    if config.get('infinite_scroll', False):
+                        self._handle_infinite_scroll()
+                    
+                    # Extraer HTML después de JS
+                    soup = BeautifulSoup(self.driver.page_source, 'lxml')
+                    product_links = self._extract_product_links(soup, config)
+                    
+                    # Scrapear cada producto
+                    for link in product_links[:config.get('max_products', 50)]:
+                        self.driver.get(link)
+                        
+                        # Esperar carga completa
+                        wait.until(EC.presence_of_element_located(
+                            (By.CSS_SELECTOR, config['selectors']['product_name'])
+                        ))
+                        
+                        # Extraer datos
+                        product_soup = BeautifulSoup(self.driver.page_source, 'lxml')
+                        product_data = self.extract_drone_specs(product_soup, brand, link)
+                        
+                        if product_data:
+                            products.append(product_data)
+                        
+                        # Delay entre productos
+                        await asyncio.sleep(config.get('delay_between_requests', 3))
         
         finally:
             if self.driver:
@@ -262,6 +311,172 @@ class DroneScraperOrchestrator:
             logger.error(f"Error scrapeando {url}: {str(e)}")
             return None
     
+    async def _scrape_pdf_content(self, pdf_url: str, brand: str, config: Dict) -> Optional[Dict]:
+        """Scrapear contenido de archivos PDF (especialmente para Parrot)"""
+        try:
+            import pdfplumber
+            import io
+            
+            headers = self._get_headers()
+            async with self.session.get(pdf_url, headers=headers) as response:
+                if response.status == 200:
+                    pdf_content = await response.read()
+                    
+                    # Extraer texto del PDF
+                    with pdfplumber.open(io.BytesIO(pdf_content)) as pdf:
+                        text = ""
+                        for page in pdf.pages:
+                            text += page.extract_text() or ""
+                    
+                    # Extraer nombre del modelo desde la URL
+                    model_name = self._extract_model_from_pdf_url(pdf_url)
+                    
+                    # Crear estructura base del drone
+                    drone_data = {
+                        'marca': brand,
+                        'modelo': model_name,
+                        'url_fuente': pdf_url,
+                        'metadata': {
+                            'fecha_extraccion': datetime.now().isoformat(),
+                            'version_scraper': '1.0.0',
+                            'confiabilidad_datos': 'media',
+                            'tipo_fuente': 'pdf'
+                        }
+                    }
+                    
+                    # Extraer especificaciones del texto
+                    specs = self._extract_specs_from_pdf_text(text, config)
+                    drone_data.update(specs)
+                    
+                    return drone_data
+                    
+        except ImportError:
+            logger.warning("pdfplumber no instalado. Instalar con: pip install pdfplumber")
+            return None
+        except Exception as e:
+            logger.error(f"Error procesando PDF {pdf_url}: {str(e)}")
+            return None
+    
+    def _extract_model_from_url(self, url: str) -> str:
+        """Extraer nombre del modelo desde la URL como fallback"""
+        try:
+            from urllib.parse import urlparse
+            
+            # Extraer el path de la URL
+            path = urlparse(url).path
+            
+            # Obtener la última parte del path
+            model_part = path.split('/')[-1]
+            
+            # Limpiar y formatear
+            if model_part:
+                # Reemplazar guiones con espacios y capitalizar
+                model_name = model_part.replace('-', ' ').replace('_', ' ')
+                
+                # Capitalizar cada palabra
+                model_name = ' '.join(word.capitalize() for word in model_name.split())
+                
+                # Mapeos específicos conocidos
+                mappings = {
+                    'Mini 4 Pro': 'Mini 4 Pro',
+                    'Mavic 3 Pro': 'Mavic 3 Pro',
+                    'Mavic 3 Classic': 'Mavic 3 Classic',
+                    'Air 3s': 'Air 3S',
+                    'Air 3': 'Air 3',
+                    'Mini 3': 'Mini 3',
+                    'Avata 2': 'Avata 2',
+                    'Inspire 3': 'Inspire 3',
+                    'Evo Max 4t': 'EVO Max 4T',
+                    'Evo Max 4n': 'EVO Max 4N',
+                    'Evo Lite Enterprise Series': 'EVO Lite Enterprise',
+                    'Autel Alpha': 'Alpha',
+                    'Evo Ii Pro Drones': 'EVO II Pro',
+                    'Evo Ii Enterprise Drones': 'EVO II Enterprise'
+                }
+                
+                return mappings.get(model_name, model_name)
+            
+            return 'Unknown Model'
+            
+        except:
+            return 'Unknown Model'
+
+    def _extract_model_from_pdf_url(self, pdf_url: str) -> str:
+        """Extraer nombre del modelo desde la URL del PDF"""
+        if 'ANAFI-Ai' in pdf_url:
+            return 'ANAFI Ai'
+        elif 'ANAFI-USA' in pdf_url:
+            return 'ANAFI USA'
+        else:
+            # Extraer nombre genérico desde la URL
+            from urllib.parse import urlparse
+            path = urlparse(pdf_url).path
+            filename = path.split('/')[-1].replace('.pdf', '').replace('-', ' ')
+            return filename.title()
+    
+    def _extract_specs_from_pdf_text(self, text: str, config: Dict) -> Dict:
+        """Extraer especificaciones técnicas del texto del PDF"""
+        import re
+        
+        specs_data = {
+            'especificaciones_tecnicas': {},
+            'camara': {},
+            'caracteristicas_vuelo': {},
+            'precio': {'usd': None, 'moneda_local': None, 'fecha_precio': None}
+        }
+        
+        # Patrones de extracción específicos para PDFs de Parrot
+        patterns = config.get('pdf_extraction', {}).get('spec_patterns', [])
+        
+        # Peso
+        weight_match = re.search(r'Weight[:\s]*(\d+\.?\d*)\s*(g|kg|grams?)', text, re.IGNORECASE)
+        if weight_match:
+            value, unit = weight_match.groups()
+            if unit.lower() in ['kg', 'kilograms']:
+                specs_data['especificaciones_tecnicas']['peso_gramos'] = float(value) * 1000
+            else:
+                specs_data['especificaciones_tecnicas']['peso_gramos'] = float(value)
+        
+        # Tiempo de vuelo
+        flight_time_match = re.search(r'(?:Flight time|Autonomy)[:\s]*(\d+)\s*(?:min|minutes)', text, re.IGNORECASE)
+        if flight_time_match:
+            specs_data['especificaciones_tecnicas']['autonomia_minutos'] = int(flight_time_match.group(1))
+        
+        # Alcance
+        range_match = re.search(r'(?:Range|Control distance)[:\s]*(\d+\.?\d*)\s*(km|m|meters?)', text, re.IGNORECASE)
+        if range_match:
+            value, unit = range_match.groups()
+            if unit.lower() in ['km', 'kilometers']:
+                specs_data['especificaciones_tecnicas']['alcance_metros'] = float(value) * 1000
+            else:
+                specs_data['especificaciones_tecnicas']['alcance_metros'] = float(value)
+        
+        # Resolución de video
+        video_match = re.search(r'(?:Video resolution|Recording)[:\s]*([48]K|1080p|720p)', text, re.IGNORECASE)
+        if video_match:
+            specs_data['camara']['resolucion_video'] = video_match.group(1).upper()
+        
+        # Velocidad máxima
+        speed_match = re.search(r'(?:Max speed|Maximum speed)[:\s]*(\d+\.?\d*)\s*(?:km/h|m/s)', text, re.IGNORECASE)
+        if speed_match:
+            specs_data['especificaciones_tecnicas']['velocidad_max_kmh'] = float(speed_match.group(1))
+        
+        # Características de vuelo (buscar palabras clave)
+        features = specs_data['caracteristicas_vuelo']
+        if re.search(r'obstacle\s+(?:avoidance|detection)', text, re.IGNORECASE):
+            features['evita_obstaculos'] = True
+        if re.search(r'return\s+(?:to\s+)?home', text, re.IGNORECASE):
+            features['retorno_automatico'] = True
+        if re.search(r'(?:follow|tracking)\s+mode', text, re.IGNORECASE):
+            features['seguimiento_objeto'] = True
+        if re.search(r'GPS', text, re.IGNORECASE):
+            features['precision_hover'] = 'GPS'
+        
+        # Clasificación automática
+        specs_data['clasificacion'] = self._classify_drone(specs_data)
+        
+        return specs_data
+    
     def extract_drone_specs(self, soup: BeautifulSoup, brand: str, url: str) -> Dict:
         """Parser inteligente para especificaciones de drones"""
         config = SCRAPER_CONFIG[brand.lower()]
@@ -280,9 +495,21 @@ class DroneScraperOrchestrator:
         # Extraer nombre del modelo
         try:
             name_elem = soup.select_one(selectors['product_name'])
-            drone_data['modelo'] = name_elem.text.strip() if name_elem else 'Unknown'
+            if name_elem:
+                model_name = name_elem.text.strip()
+                # Limpiar el nombre del modelo
+                if model_name and model_name != '':
+                    # Remover palabras comunes que no son parte del modelo
+                    model_name = model_name.replace('DJI ', '').replace('Autel ', '').replace('Parrot ', '')
+                    drone_data['modelo'] = model_name
+                else:
+                    # Intentar extraer desde la URL
+                    drone_data['modelo'] = self._extract_model_from_url(url)
+            else:
+                # Fallback: extraer desde la URL
+                drone_data['modelo'] = self._extract_model_from_url(url)
         except:
-            drone_data['modelo'] = 'Unknown'
+            drone_data['modelo'] = self._extract_model_from_url(url)
         
         # Extraer precio
         try:
@@ -328,28 +555,80 @@ class DroneScraperOrchestrator:
         # Buscar tabla de especificaciones
         specs_table = soup.select_one(selectors.get('specs_table', '.specs-table'))
         if specs_table:
+            # Procesar tabla
             rows = specs_table.select('tr')
             for row in rows:
-                label = row.select_one('td:first-child')
-                value = row.select_one('td:last-child')
-                
-                if label and value:
-                    label_text = label.text.strip().lower()
-                    value_text = value.text.strip()
+                cells = row.select('td, th')
+                if len(cells) >= 2:
+                    label = cells[0].text.strip().lower()
+                    value = cells[1].text.strip()
                     
                     # Mapear a campos estándar
-                    if 'weight' in label_text or 'peso' in label_text:
-                        specs['peso_gramos'] = self.data_cleaner.extract_number(value_text, 'grams')
-                    elif 'flight time' in label_text or 'autonomía' in label_text:
-                        specs['autonomia_minutos'] = self.data_cleaner.extract_number(value_text, 'minutes')
-                    elif 'range' in label_text or 'alcance' in label_text:
-                        specs['alcance_metros'] = self.data_cleaner.extract_number(value_text, 'meters')
-                    elif 'speed' in label_text or 'velocidad' in label_text:
-                        specs['velocidad_max_kmh'] = self.data_cleaner.extract_number(value_text, 'kmh')
-                    elif 'wind' in label_text or 'viento' in label_text:
-                        specs['resistencia_viento'] = value_text
-                    elif 'temperature' in label_text or 'temperatura' in label_text:
-                        specs['temperatura_operacion'] = value_text
+                    if any(keyword in label for keyword in ['weight', 'peso', 'mass']):
+                        specs['peso_gramos'] = self.data_cleaner.extract_number(value, 'grams')
+                    elif any(keyword in label for keyword in ['flight time', 'autonomía', 'battery life', 'endurance']):
+                        specs['autonomia_minutos'] = self.data_cleaner.extract_number(value, 'minutes')
+                    elif any(keyword in label for keyword in ['range', 'alcance', 'transmission', 'control distance']):
+                        specs['alcance_metros'] = self.data_cleaner.extract_number(value, 'meters')
+                    elif any(keyword in label for keyword in ['speed', 'velocidad', 'velocity']):
+                        specs['velocidad_max_kmh'] = self.data_cleaner.extract_number(value, 'kmh')
+                    elif any(keyword in label for keyword in ['wind', 'viento']):
+                        specs['resistencia_viento'] = value
+                    elif any(keyword in label for keyword in ['temperature', 'temperatura']):
+                        specs['temperatura_operacion'] = value
+        else:
+            # Si no hay tabla, buscar en todo el texto de la página
+            page_text = soup.get_text().lower()
+            
+            # Usar patrones regex para extraer specs del texto general
+            import re
+            
+            # Peso
+            weight_patterns = [
+                r'weight[:\s]*(\d+\.?\d*)\s*(g|grams?|kg)',
+                r'(\d+\.?\d*)\s*(g|grams?)\s*weight',
+                r'weighs?\s*(\d+\.?\d*)\s*(g|grams?|kg)'
+            ]
+            
+            for pattern in weight_patterns:
+                match = re.search(pattern, page_text)
+                if match:
+                    value, unit = match.groups()
+                    if unit.lower() in ['kg']:
+                        specs['peso_gramos'] = float(value) * 1000
+                    else:
+                        specs['peso_gramos'] = float(value)
+                    break
+            
+            # Tiempo de vuelo
+            flight_patterns = [
+                r'flight time[:\s]*(\d+)\s*(?:min|minutes)',
+                r'(\d+)\s*(?:min|minutes?)\s*flight\s*time',
+                r'up to\s*(\d+)\s*(?:min|minutes?)\s*flight'
+            ]
+            
+            for pattern in flight_patterns:
+                match = re.search(pattern, page_text)
+                if match:
+                    specs['autonomia_minutos'] = int(match.group(1))
+                    break
+            
+            # Alcance
+            range_patterns = [
+                r'range[:\s]*(\d+\.?\d*)\s*(km|m|meters?|kilometres?)',
+                r'transmission range[:\s]*(\d+\.?\d*)\s*(km|m)',
+                r'up to\s*(\d+\.?\d*)\s*(km|m)\s*range'
+            ]
+            
+            for pattern in range_patterns:
+                match = re.search(pattern, page_text)
+                if match:
+                    value, unit = match.groups()
+                    if unit.lower() in ['km', 'kilometres', 'kilometers']:
+                        specs['alcance_metros'] = float(value) * 1000
+                    else:
+                        specs['alcance_metros'] = float(value)
+                    break
         
         return specs
     
@@ -469,7 +748,7 @@ class DroneScraperOrchestrator:
     
     def save_raw_data(self, brand: str, data: List[Dict]) -> None:
         """Guardar datos crudos por marca"""
-        output_dir = Path('../data/raw')
+        output_dir = Path(__file__).parent.parent / 'data' / 'raw'
         output_dir.mkdir(parents=True, exist_ok=True)
         
         filename = output_dir / f'{brand.lower()}_products.json'
@@ -531,7 +810,11 @@ class DroneScraperOrchestrator:
         """Guardar estadísticas de extracción"""
         self.extraction_stats['end_time'] = datetime.now().isoformat()
         
-        with open('../data/extraction_log.json', 'w', encoding='utf-8') as f:
+        log_dir = Path(__file__).parent.parent / 'data'
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file = log_dir / 'extraction_log.json'
+        
+        with open(log_file, 'w', encoding='utf-8') as f:
             json.dump(self.extraction_stats, f, ensure_ascii=False, indent=2)
 
 
@@ -557,7 +840,7 @@ async def main():
     valid_data = [d for d in cleaned_data if validator.validate_drone_data(d)[0]]
     
     # Guardar datos procesados
-    output_path = Path('../data/processed/unified_drones.json')
+    output_path = Path(__file__).parent.parent / 'data' / 'processed' / 'unified_drones.json'
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     with open(output_path, 'w', encoding='utf-8') as f:

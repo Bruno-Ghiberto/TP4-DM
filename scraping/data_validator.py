@@ -103,7 +103,7 @@ class DataValidator:
                     "properties": {
                         "resolucion_video": {
                             "type": ["string", "null"],
-                            "enum": ["4K", "6K", "8K", "1080p", "720p", null]
+                            "enum": ["4K", "6K", "8K", "1080p", "720p", None]
                         },
                         "fps_max": {
                             "type": ["number", "null"],
@@ -116,7 +116,7 @@ class DataValidator:
                         },
                         "estabilizacion": {
                             "type": ["string", "null"],
-                            "enum": ["mecanica", "digital", "hibrida", null]
+                            "enum": ["mecanica", "digital", "hibrida", None]
                         },
                         "zoom_optico": {
                             "type": ["number", "null"],

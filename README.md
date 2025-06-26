@@ -1,8 +1,5 @@
 ## 📚 DOCUMENTACIÓN Y CONFIGURACIÓN
 
-### Archivo: README.md
-**Descripción:** Documentación completa del proyecto
-
 ```markdown
 # 🚁 DroneMatch Pro - Comparador Inteligente de Drones
 

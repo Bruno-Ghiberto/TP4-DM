@@ -1,0 +1,362 @@
+[
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/mavic-3-pro",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:14:19.942919",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Mavic 3 Pro",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/mavic-3-classic",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:14:25.681068",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Soporte para Mavic 3 Classic",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/air-3s",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:14:31.674727",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Air 3S",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/air-3",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:14:37.507452",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Soporte para Air 3",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/mini-4-pro",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:14:42.941863",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Mini 4 Pro",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/mini-3",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:14:48.228969",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Mini 3",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/flip",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:14:54.265186",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Flip",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/avata-2",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:15:00.220283",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "DJI Avata 2",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "dji",
+    "url_fuente": "https://www.dji.com/inspire-3",
+    "metadata": {
+      "fecha_extraccion": "2025-06-26T14:15:05.899964",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Inspire 3",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": false,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": null
+    },
+    "clasificacion": {
+      "categoria_peso": "pesado",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [],
+      "certificaciones": []
+    }
+  }
+]
