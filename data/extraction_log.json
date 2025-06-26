@@ -1,0 +1,26 @@
+2025-06-26 15:38:23,397 - __main__ - INFO - Iniciando scraping de drones...
+2025-06-26 15:38:23,398 - __main__ - INFO - Iniciando scraping de dji...
+2025-06-26 15:38:29,753 - __main__ - INFO - Extraído drone: Mavic 3 Pro con 0 especificaciones
+2025-06-26 15:38:35,800 - __main__ - INFO - Extraído drone: Soporte para Mavic 3 Classic con 0 especificaciones
+2025-06-26 15:38:41,982 - __main__ - INFO - Extraído drone: Air 3S con 0 especificaciones
+2025-06-26 15:38:47,507 - __main__ - INFO - Extraído drone: Soporte para Air 3 con 0 especificaciones
+2025-06-26 15:38:52,684 - __main__ - INFO - Extraído drone: Mini 4 Pro con 0 especificaciones
+2025-06-26 15:38:58,247 - __main__ - INFO - Extraído drone: Mini 3 con 0 especificaciones
+2025-06-26 15:39:03,455 - __main__ - INFO - Extraído drone: Flip con 0 especificaciones
+2025-06-26 15:39:09,088 - __main__ - INFO - Extraído drone: DJI Avata 2 con 0 especificaciones
+2025-06-26 15:39:14,782 - __main__ - INFO - Extraído drone: Inspire 3 con 0 especificaciones
+2025-06-26 15:39:23,018 - __main__ - INFO - Guardados 9 productos de dji en c:\Users\bghiberto\Documents\Bruno Ghiberto\IES\Minería de datos\Tp4\data\raw\dji_products.json
+2025-06-26 15:39:23,019 - __main__ - INFO - Iniciando scraping de autel...
+2025-06-26 15:39:38,524 - __main__ - INFO - Extraído drone: Lightweight Yet MightyVideo con 1 especificaciones
+2025-06-26 15:39:50,779 - __main__ - INFO - Extraído drone: Alpha con 3 especificaciones
+2025-06-26 15:40:00,102 - __main__ - INFO - Extraído drone: EVO Max 4T con 3 especificaciones
+2025-06-26 15:40:26,951 - __main__ - INFO - Extraído drone: EVO Max 4N Drone con 1 especificaciones
+2025-06-26 15:40:34,142 - __main__ - INFO - Extraído drone: EVO II Enterprise V3 con 3 especificaciones
+2025-06-26 15:40:40,079 - __main__ - INFO - Extraído drone: EVO II Dual 640T V3 con 3 especificaciones
+2025-06-26 15:40:46,226 - __main__ - INFO - Extraído drone: EVO II RTK Series V3 con 3 especificaciones
+2025-06-26 15:40:51,966 - __main__ - INFO - Extraído drone: EVO II Pro V3 con 2 especificaciones
+2025-06-26 15:41:00,478 - __main__ - INFO - Extraído drone: Dragonfish Series con 2 especificaciones
+2025-06-26 15:41:09,681 - __main__ - INFO - Guardados 9 productos de autel en c:\Users\bghiberto\Documents\Bruno Ghiberto\IES\Minería de datos\Tp4\data\raw\autel_products.json
+2025-06-26 15:41:09,682 - __main__ - INFO - Iniciando scraping de parrot...
+2025-06-26 15:41:22,445 - __main__ - INFO - Guardados 2 productos de parrot en c:\Users\bghiberto\Documents\Bruno Ghiberto\IES\Minería de datos\Tp4\data\raw\parrot_products.json
+2025-06-26 15:41:22,447 - __main__ - ERROR - Error en proceso principal: 'DroneScraperOrchestrator' object has no attribute '_save_extraction_stats'

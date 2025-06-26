@@ -4,19 +4,21 @@
 import asyncio
 import json
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 import aiohttp
+from aiohttp import ClientTimeout, TCPConnector
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from data_cleaner import DataCleaner
 from data_validator import DataValidator
@@ -60,7 +62,15 @@ class DroneScraperOrchestrator:
         """Scraping coordinado de todas las marcas"""
         results = {}
         
-        async with aiohttp.ClientSession() as self.session:
+        # Configurar cliente HTTP con reintentos y timeouts
+        timeout = ClientTimeout(total=30, connect=10)
+        connector = TCPConnector(limit=10, limit_per_host=2, enable_cleanup_closed=True)
+        
+        async with aiohttp.ClientSession(
+            timeout=timeout,
+            connector=connector,
+            headers=self._get_default_headers()
+        ) as self.session:
             for brand, config in SCRAPER_CONFIG.items():
                 logger.info(f"Iniciando scraping de {brand}...")
                 
@@ -104,7 +114,58 @@ class DroneScraperOrchestrator:
         # Guardar estadísticas de extracción
         self._save_extraction_stats()
         
+        # Generar reporte final
+        self._generate_final_report()
+        
         return results
+
+    def _generate_final_report(self):
+        """Generar reporte final de extracción"""
+        end_time = datetime.now()
+        start_time = datetime.fromisoformat(self.extraction_stats['start_time'])
+        duration = (end_time - start_time).total_seconds()
+        
+        report = {
+            'resumen_extraccion': {
+                'fecha_inicio': self.extraction_stats['start_time'],
+                'fecha_fin': end_time.isoformat(),
+                'duracion_segundos': duration,
+                'duracion_minutos': round(duration / 60, 2),
+                'total_drones_extraidos': self.extraction_stats['total_products'],
+                'total_errores': len(self.extraction_stats['errors']),
+                'marcas_procesadas': len(self.extraction_stats['brands_scraped'])
+            },
+            'detalle_por_marca': self.extraction_stats['brands_scraped'],
+            'errores_encontrados': self.extraction_stats['errors'],
+            'urls_procesadas': getattr(self, 'urls_processed', []),
+            'especificaciones_extraidas': getattr(self, 'specs_extracted', {}),
+            'calidad_datos': {
+                'drones_con_specs_completas': 0,
+                'drones_con_specs_parciales': 0,
+                'drones_sin_specs': 0
+            }
+        }
+        
+        # Guardar reporte
+        report_path = Path(__file__).parent.parent / 'data' / 'extraction_report.json'
+        with open(report_path, 'w', encoding='utf-8') as f:
+            json.dump(report, f, indent=2, ensure_ascii=False)
+        
+        logger.info(f"Reporte de extracción generado: {report_path}")
+        logger.info(f"Resumen: {report['resumen_extraccion']['total_drones_extraidos']} drones en {report['resumen_extraccion']['duracion_minutos']} minutos")
+        
+        # Mostrar estadísticas en consola
+        print(f"\n{'='*50}")
+        print("REPORTE FINAL DE EXTRACCIÓN")
+        print(f"{'='*50}")
+        print(f"Duración total: {report['resumen_extraccion']['duracion_minutos']} minutos")
+        print(f"Drones extraídos: {report['resumen_extraccion']['total_drones_extraidos']}")
+        print(f"Errores encontrados: {report['resumen_extraccion']['total_errores']}")
+        print(f"Marcas procesadas: {report['resumen_extraccion']['marcas_procesadas']}")
+        print(f"\nDetalle por marca:")
+        for marca, cantidad in report['detalle_por_marca'].items():
+            print(f"  - {marca.upper()}: {cantidad} drones")
+        print(f"{'='*50}\n")
     
     async def _scrape_brand(self, brand: str, config: Dict, crawl_delay: float) -> List[Dict]:
         """Scraping específico por marca"""
@@ -301,15 +362,72 @@ class DroneScraperOrchestrator:
     async def _scrape_product_page(self, url: str, brand: str, config: Dict) -> Optional[Dict]:
         """Scrapear página individual de producto"""
         try:
-            headers = self._get_headers()
-            async with self.session.get(url, headers=headers) as response:
-                if response.status == 200:
-                    html = await response.text()
-                    soup = BeautifulSoup(html, 'lxml')
-                    return self.extract_drone_specs(soup, brand, url)
+            logger.info(f"Procesando URL: {url}")
+            
+            # Intentar primero con scraping estático
+            html = await self._fetch_page_robust(url)
+            if not html:
+                logger.warning(f"No se pudo obtener HTML para {url}")
+                return None
+            
+            soup = BeautifulSoup(html, 'lxml')
+            
+            # Extraer especificaciones
+            drone_data = self.extract_drone_specs(soup, brand, url)
+            
+            # Verificar si obtuvimos especificaciones útiles
+            specs = drone_data.get('especificaciones_tecnicas', {})
+            valid_specs = sum(1 for v in specs.values() if v is not None)
+            
+            # Si no hay suficientes especificaciones, intentar con Selenium
+            if valid_specs < 2 and config.get('requires_js', False):
+                logger.info(f"Pocas especificaciones ({valid_specs}), intentando con Selenium: {url}")
+                
+                selenium_data = await self._scrape_with_selenium_single(url, brand, config)
+                if selenium_data:
+                    selenium_specs = selenium_data.get('especificaciones_tecnicas', {})
+                    selenium_valid_specs = sum(1 for v in selenium_specs.values() if v is not None)
+                    
+                    if selenium_valid_specs > valid_specs:
+                        logger.info(f"Selenium obtuvo más especificaciones ({selenium_valid_specs} vs {valid_specs})")
+                        return selenium_data
+            
+            return drone_data
+            
         except Exception as e:
             logger.error(f"Error scrapeando {url}: {str(e)}")
             return None
+
+    async def _scrape_with_selenium_single(self, url: str, brand: str, config: Dict) -> Optional[Dict]:
+        """Scraping con Selenium para una URL específica"""
+        driver = None
+        try:
+            driver = self.setup_selenium_driver()
+            driver.get(url)
+            
+            # Esperar carga de contenido dinámico
+            wait = WebDriverWait(driver, 15)
+            try:
+                wait.until(EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, config['selectors']['product_name'])
+                ))
+            except:
+                # Si no encuentra el selector específico, esperar carga general
+                wait.until(lambda driver: driver.execute_script("return document.readyState") == "complete")
+            
+            # Extraer datos del producto
+            product_soup = BeautifulSoup(driver.page_source, 'lxml')
+            return self.extract_drone_specs(product_soup, brand, url)
+            
+        except Exception as e:
+            logger.error(f"Error con Selenium para {url}: {str(e)}")
+            return None
+        finally:
+            if driver:
+                try:
+                    driver.quit()
+                except:
+                    pass
     
     async def _scrape_pdf_content(self, pdf_url: str, brand: str, config: Dict) -> Optional[Dict]:
         """Scrapear contenido de archivos PDF (especialmente para Parrot)"""
@@ -491,43 +609,380 @@ class DroneScraperOrchestrator:
             }
         }
         
-        # Extraer nombre del modelo
-        try:
-            name_elem = soup.select_one(selectors['product_name'])
-            if name_elem:
-                model_name = name_elem.text.strip()
-                # Limpiar el nombre del modelo
-                if model_name and model_name != '':
-                    # Remover palabras comunes que no son parte del modelo
-                    model_name = model_name.replace('DJI ', '').replace('Autel ', '').replace('Parrot ', '')
-                    drone_data['modelo'] = model_name
-                else:
-                    # Intentar extraer desde la URL
-                    drone_data['modelo'] = self._extract_model_from_url(url)
-            else:
-                # Fallback: extraer desde la URL
-                drone_data['modelo'] = self._extract_model_from_url(url)
-        except:
-            drone_data['modelo'] = self._extract_model_from_url(url)
+        # 1. Intentar extraer datos estructurados primero
+        json_ld_data = self._extract_json_ld_data(soup)
+        microdata = self._extract_microdata(soup)
         
-        # Extraer especificaciones técnicas
-        specs = self._extract_technical_specs(soup, selectors)
-        drone_data['especificaciones_tecnicas'] = specs
+        # 2. Extraer nombre del modelo
+        model_name = None
         
-        # Extraer características de cámara
-        camera_specs = self._extract_camera_specs(soup, selectors)
-        drone_data['camara'] = camera_specs
+        # Desde datos estructurados
+        if json_ld_data:
+            for data in json_ld_data:
+                if data.get('@type') == 'Product' and data.get('name'):
+                    model_name = data['name']
+                    break
         
-        # Extraer características de vuelo
-        flight_features = self._extract_flight_features(soup, selectors)
+        # Desde microdata
+        if not model_name and microdata.get('name'):
+            model_name = microdata['name']
+        
+        # Desde selectores CSS
+        if not model_name:
+            try:
+                name_elem = soup.select_one(selectors['product_name'])
+                if name_elem:
+                    model_name = name_elem.get_text(strip=True)
+            except:
+                pass
+        
+        # Desde URL como último recurso
+        if not model_name:
+            model_name = self._extract_model_from_url(url)
+        
+        # Limpiar nombre del modelo
+        if model_name:
+            model_name = model_name.replace('DJI ', '').replace('Autel ', '').replace('Parrot ', '')
+            model_name = re.sub(r'\s+', ' ', model_name).strip()
+            drone_data['modelo'] = model_name
+        
+        # 3. Extraer especificaciones técnicas
+        raw_specs = {}
+        
+        # Desde JSON-LD
+        if json_ld_data:
+            for data in json_ld_data:
+                if isinstance(data, dict):
+                    # Buscar propiedades relevantes
+                    for key, value in data.items():
+                        if key.lower() in ['weight', 'dimensions', 'specifications']:
+                            raw_specs[key] = value
+        
+        # Desde microdata
+        raw_specs.update(microdata)
+        
+        # Desde tablas/listas HTML
+        table_specs = self._extract_specs_from_tables(soup)
+        raw_specs.update(table_specs)
+        
+        # También buscar en texto libre con regex
+        page_text = soup.get_text()
+        regex_specs = self._extract_specs_with_regex(page_text)
+        raw_specs.update(regex_specs)
+        
+        # Normalizar especificaciones
+        normalized_specs = self._normalize_spec_fields(raw_specs)
+        
+        # Estructura final de especificaciones
+        drone_data['especificaciones_tecnicas'] = {
+            'peso_gramos': normalized_specs.get('peso_gramos'),
+            'autonomia_minutos': normalized_specs.get('autonomia_minutos'),
+            'alcance_metros': normalized_specs.get('alcance_metros'),
+            'velocidad_max_kmh': normalized_specs.get('velocidad_max_kmh'),
+            'resistencia_viento': normalized_specs.get('resistencia_viento'),
+            'temperatura_operacion': normalized_specs.get('temperatura_operacion')
+        }
+        
+        # 4. Extraer características de cámara
+        drone_data['camara'] = {
+            'resolucion_video': normalized_specs.get('resolucion_video'),
+            'fps_max': None,
+            'sensor_tamaño': normalized_specs.get('sensor_tamaño'),
+            'estabilizacion': normalized_specs.get('estabilizacion'),
+            'zoom_optico': normalized_specs.get('zoom_optico'),
+            'zoom_digital': normalized_specs.get('zoom_digital')
+        }
+        
+        # 5. Extraer características de vuelo
+        flight_features = self._extract_flight_features_enhanced(soup)
         drone_data['caracteristicas_vuelo'] = flight_features
         
-        # Clasificación automática
+        # 6. Clasificación automática
         drone_data['clasificacion'] = self._classify_drone(drone_data)
         
+        logger.info(f"Extraído drone: {model_name} con {len([v for v in normalized_specs.values() if v])} especificaciones")
+        
         return drone_data
+
+    def _extract_specs_with_regex(self, text: str) -> Dict:
+        """Extraer especificaciones usando regex en texto libre"""
+        specs = {}
+        
+        # Patrones regex para diferentes especificaciones
+        patterns = {
+            'peso_gramos': [
+                r'weight[:\s]*(\d+\.?\d*)\s*(g|grams?|kg)',
+                r'(\d+\.?\d*)\s*(g|grams?|kg)\s*weight',
+                r'weighs?\s*(\d+\.?\d*)\s*(g|grams?|kg)'
+            ],
+            'autonomia_minutos': [
+                r'flight\s*time[:\s]*(\d+)\s*(min|minutes?|hrs?|hours?)',
+                r'battery\s*life[:\s]*(\d+)\s*(min|minutes?|hrs?|hours?)',
+                r'up\s*to\s*(\d+)\s*(min|minutes?|hrs?|hours?)\s*flight'
+            ],
+            'alcance_metros': [
+                r'range[:\s]*(\d+\.?\d*)\s*(m|meters?|km|kilometers?|ft|feet)',
+                r'(\d+\.?\d*)\s*(m|meters?|km|kilometers?|ft|feet)\s*range',
+                r'transmission\s*range[:\s]*(\d+\.?\d*)\s*(m|meters?|km|kilometers?)'
+            ],
+            'velocidad_max_kmh': [
+                r'max\s*speed[:\s]*(\d+\.?\d*)\s*(km/h|m/s)',
+                r'speed[:\s]*(\d+\.?\d*)\s*(km/h|m/s)',
+                r'up\s*to\s*(\d+\.?\d*)\s*(km/h|m/s)'
+            ]
+        }
+        
+        for spec_name, pattern_list in patterns.items():
+            for pattern in pattern_list:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    value, unit = match.groups()
+                    
+                    # Convertir unidades si es necesario
+                    if spec_name == 'peso_gramos':
+                        if unit.lower() in ['kg']:
+                            specs[spec_name] = float(value) * 1000
+                        else:
+                            specs[spec_name] = float(value)
+                    elif spec_name == 'autonomia_minutos':
+                        if unit.lower() in ['hrs', 'hours', 'hour']:
+                            specs[spec_name] = float(value) * 60
+                        else:
+                            specs[spec_name] = float(value)
+                    elif spec_name == 'alcance_metros':
+                        if unit.lower() in ['km', 'kilometers']:
+                            specs[spec_name] = float(value) * 1000
+                        elif unit.lower() in ['ft', 'feet']:
+                            specs[spec_name] = float(value) * 0.3048
+                        else:
+                            specs[spec_name] = float(value)
+                    elif spec_name == 'velocidad_max_kmh':
+                        if unit.lower() in ['mph']:
+                            specs[spec_name] = float(value) * 1.60934
+                        elif unit.lower() in ['m/s']:
+                            specs[spec_name] = float(value) * 3.6
+                        else:
+                            specs[spec_name] = float(value)
+                    
+                    break  # Tomar la primera coincidencia
+        
+        return specs
+
+    def _extract_flight_features_enhanced(self, soup: BeautifulSoup) -> Dict:
+        """Extraer características de vuelo mejoradas"""
+        features = {
+            'evita_obstaculos': False,
+            'retorno_automatico': False,
+            'seguimiento_objeto': False,
+            'vuelo_nocturno': False,
+            'modo_sport': False,
+            'precision_hover': None
+        }
+        
+        # Buscar en texto de la página
+        page_text = soup.get_text().lower()
+        
+        # Patrones de detección
+        feature_patterns = {
+            'evita_obstaculos': [
+                'obstacle avoidance', 'obstacle detection', 'collision avoidance',
+                'evita obstáculos', 'detección de obstáculos', 'sensors'
+            ],
+            'retorno_automatico': [
+                'return to home', 'rth', 'auto return', 'fail safe',
+                'retorno automático', 'vuelta a casa'
+            ],
+            'seguimiento_objeto': [
+                'follow me', 'object tracking', 'subject tracking', 'activetrack',
+                'seguimiento', 'rastreo', 'tracking'
+            ],
+            'vuelo_nocturno': [
+                'night flight', 'low light', 'night vision', 'led lights',
+                'vuelo nocturno', 'luces led'
+            ],
+            'modo_sport': [
+                'sport mode', 'high speed', 'racing mode', 'acro mode',
+                'modo deporte', 'alta velocidad'
+            ]
+        }
+        
+        for feature_name, patterns in feature_patterns.items():
+            for pattern in patterns:
+                if pattern in page_text:
+                    features[feature_name] = True
+                    break
+        
+        # Detectar sistema de posicionamiento
+        if any(term in page_text for term in ['gps', 'gnss', 'glonass', 'galileo']):
+            features['precision_hover'] = 'GPS'
+        elif any(term in page_text for term in ['vision', 'visual', 'optical']):
+            features['precision_hover'] = 'Visual'
+        
+        return features
     
-    def _extract_technical_specs(self, soup: BeautifulSoup, selectors: Dict) -> Dict:
+    def _extract_specs_from_tables(self, soup: BeautifulSoup) -> Dict:
+        """Extracción genérica de especificaciones desde tablas"""
+        specs = {}
+        
+        # Selectores genéricos para tablas de especificaciones
+        table_selectors = [
+            'table.specs', 'table.specifications', 'table.tech-specs',
+            '.spec-table', '.specification-table', '.product-specs',
+            'table[class*="spec"]', 'table[class*="tech"]',
+            '.specs-content table', '.technical-specs table'
+        ]
+        
+        spec_table = None
+        for selector in table_selectors:
+            spec_table = soup.select_one(selector)
+            if spec_table:
+                break
+        
+        if spec_table:
+            rows = spec_table.find_all('tr')
+            for row in rows:
+                cells = row.find_all(['td', 'th'])
+                if len(cells) >= 2:
+                    key = cells[0].get_text(strip=True).lower()
+                    value = cells[1].get_text(strip=True)
+                    
+                    if key and value:
+                        specs[key] = value
+        
+        # También buscar en listas de especificaciones
+        list_selectors = [
+            '.specs-list', '.specification-list', '.product-features',
+            'ul.specs', 'dl.specs', '.tech-specs ul',
+            '[class*="spec"] ul', '[class*="spec"] dl'
+        ]
+        
+        for selector in list_selectors:
+            spec_list = soup.select_one(selector)
+            if spec_list:
+                # Para listas de definición (dl/dt/dd)
+                if spec_list.name == 'dl':
+                    terms = spec_list.find_all('dt')
+                    definitions = spec_list.find_all('dd')
+                    for term, definition in zip(terms, definitions):
+                        key = term.get_text(strip=True).lower()
+                        value = definition.get_text(strip=True)
+                        if key and value:
+                            specs[key] = value
+                
+                # Para listas regulares con patrones clave:valor
+                else:
+                    items = spec_list.find_all('li')
+                    for item in items:
+                        text = item.get_text(strip=True)
+                        if ':' in text:
+                            parts = text.split(':', 1)
+                            if len(parts) == 2:
+                                key = parts[0].strip().lower()
+                                value = parts[1].strip()
+                                if key and value:
+                                    specs[key] = value
+        
+        return specs
+
+    def _normalize_spec_fields(self, raw_specs: Dict) -> Dict:
+        """Normalizar nombres de campos de especificaciones"""
+        field_mapping = {
+            # Peso
+            'weight': 'peso_gramos',
+            'takeoff weight': 'peso_gramos',
+            'max takeoff weight': 'peso_gramos',
+            'mtow': 'peso_gramos',
+            'peso': 'peso_gramos',
+            'mass': 'peso_gramos',
+            
+            # Autonomía
+            'flight time': 'autonomia_minutos',
+            'max flight time': 'autonomia_minutos',
+            'battery life': 'autonomia_minutos',
+            'endurance': 'autonomia_minutos',
+            'tiempo de vuelo': 'autonomia_minutos',
+            'autonomía': 'autonomia_minutos',
+            
+            # Alcance
+            'range': 'alcance_metros',
+            'max range': 'alcance_metros',
+            'transmission range': 'alcance_metros',
+            'control range': 'alcance_metros',
+            'operating range': 'alcance_metros',
+            'alcance': 'alcance_metros',
+            'rango': 'alcance_metros',
+            
+            # Velocidad
+            'max speed': 'velocidad_max_kmh',
+            'top speed': 'velocidad_max_kmh',
+            'maximum speed': 'velocidad_max_kmh',
+            'speed': 'velocidad_max_kmh',
+            'velocidad máxima': 'velocidad_max_kmh',
+            'velocidad': 'velocidad_max_kmh',
+            
+            # Resistencia al viento
+            'wind resistance': 'resistencia_viento',
+            'max wind speed': 'resistencia_viento',
+            'wind speed': 'resistencia_viento',
+            'resistencia al viento': 'resistencia_viento',
+            
+            # Temperatura
+            'operating temperature': 'temperatura_operacion',
+            'temp range': 'temperatura_operacion',
+            'temperature range': 'temperatura_operacion',
+            'temperatura de operación': 'temperatura_operacion',
+            
+            # Cámara
+            'video resolution': 'resolucion_video',
+            'max video resolution': 'resolucion_video',
+            'recording resolution': 'resolucion_video',
+            'resolución de video': 'resolucion_video',
+            
+            'photo resolution': 'resolucion_foto',
+            'max photo resolution': 'resolucion_foto',
+            'still resolution': 'resolucion_foto',
+            'resolución de foto': 'resolucion_foto',
+            
+            'sensor size': 'sensor_tamaño',
+            'image sensor': 'sensor_tamaño',
+            'tamaño del sensor': 'sensor_tamaño',
+            
+            'gimbal': 'estabilizacion',
+            'stabilization': 'estabilizacion',
+            'estabilización': 'estabilizacion',
+            
+            'zoom': 'zoom_optico',
+            'optical zoom': 'zoom_optico',
+            'zoom óptico': 'zoom_optico',
+            
+            'digital zoom': 'zoom_digital',
+            'zoom digital': 'zoom_digital'
+        }
+        
+        normalized = {}
+        
+        for raw_key, value in raw_specs.items():
+            # Normalizar la clave
+            normalized_key = None
+            for mapping_key, standard_key in field_mapping.items():
+                if mapping_key in raw_key.lower():
+                    normalized_key = standard_key
+                    break
+            
+            if normalized_key:
+                # Procesar el valor según el tipo de campo
+                if 'gramos' in normalized_key:
+                    normalized[normalized_key] = self.data_cleaner.extract_number(str(value), 'grams')
+                elif 'minutos' in normalized_key:
+                    normalized[normalized_key] = self.data_cleaner.extract_number(str(value), 'minutes')
+                elif 'metros' in normalized_key:
+                    normalized[normalized_key] = self.data_cleaner.extract_number(str(value), 'meters')
+                elif 'kmh' in normalized_key:
+                    normalized[normalized_key] = self.data_cleaner.extract_number(str(value), 'kmh')
+                else:
+                    normalized[normalized_key] = str(value).strip()
+        
+        return normalized
         """Extraer especificaciones técnicas"""
         specs = {
             'peso_gramos': None,
@@ -957,47 +1412,335 @@ class DroneScraperOrchestrator:
             'Cache-Control': 'max-age=0'
         }
     
+    def _get_default_headers(self) -> Dict[str, str]:
+        """Headers por defecto para requests HTTP"""
+        return {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
+        }
+    
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((aiohttp.ClientError, asyncio.TimeoutError))
+    )
+    async def _fetch_page_robust(self, url: str, headers: Optional[Dict] = None) -> Optional[str]:
+        """Fetch robusto de página con manejo de errores y reintentos"""
+        try:
+            request_headers = {**self._get_default_headers(), **(headers or {})}
+            
+            async with self.session.get(url, headers=request_headers) as response:
+                # Manejo de códigos de estado
+                if response.status == 404:
+                    logger.warning(f"Página no encontrada: {url}")
+                    return None
+                elif response.status == 403:
+                    logger.warning(f"Acceso denegado: {url}")
+                    return None
+                elif response.status >= 400:
+                    logger.error(f"Error HTTP {response.status} para {url}")
+                    response.raise_for_status()
+                
+                # Verificar tipo de contenido
+                content_type = response.headers.get('content-type', '').lower()
+                if 'text/html' not in content_type and 'application/json' not in content_type:
+                    logger.warning(f"Tipo de contenido inesperado para {url}: {content_type}")
+                
+                return await response.text()
+                
+        except aiohttp.ClientError as e:
+            logger.error(f"Error de cliente HTTP para {url}: {str(e)}")
+            raise
+        except asyncio.TimeoutError as e:
+            logger.error(f"Timeout para {url}: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Error inesperado para {url}: {str(e)}")
+            return None
+
+    def _extract_json_ld_data(self, soup: BeautifulSoup) -> List[Dict]:
+        """Extraer datos estructurados JSON-LD"""
+        json_ld_data = []
+        
+        # Buscar scripts con JSON-LD
+        json_scripts = soup.find_all('script', type='application/ld+json')
+        
+        for script in json_scripts:
+            try:
+                data = json.loads(script.string)
+                if isinstance(data, list):
+                    json_ld_data.extend(data)
+                else:
+                    json_ld_data.append(data)
+            except (json.JSONDecodeError, AttributeError) as e:
+                logger.debug(f"Error parseando JSON-LD: {str(e)}")
+                continue
+        
+        return json_ld_data
+
+    def _extract_microdata(self, soup: BeautifulSoup) -> Dict:
+        """Extraer microdata de la página"""
+        microdata = {}
+        
+        # Buscar elementos con itemtype="Product"
+        products = soup.find_all(attrs={'itemtype': lambda x: x and 'Product' in x})
+        
+        for product in products:
+            # Extraer propiedades del producto
+            props = {}
+            
+            # Nombre del producto
+            name_elem = product.find(attrs={'itemprop': 'name'})
+            if name_elem:
+                props['name'] = name_elem.get_text(strip=True)
+            
+            # Descripción
+            desc_elem = product.find(attrs={'itemprop': 'description'})
+            if desc_elem:
+                props['description'] = desc_elem.get_text(strip=True)
+            
+            # Especificaciones adicionales
+            for prop in ['weight', 'dimensions', 'model', 'brand']:
+                elem = product.find(attrs={'itemprop': prop})
+                if elem:
+                    props[prop] = elem.get_text(strip=True)
+            
+            if props:
+                microdata.update(props)
+        
+        return microdata
+
     def _save_extraction_stats(self):
         """Guardar estadísticas de extracción"""
-        self.extraction_stats['end_time'] = datetime.now().isoformat()
-        
-        log_dir = Path(__file__).parent.parent / 'data'
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / 'extraction_log.json'
-        
-        with open(log_file, 'w', encoding='utf-8') as f:
-            json.dump(self.extraction_stats, f, ensure_ascii=False, indent=2)
+        try:
+            self.extraction_stats['end_time'] = datetime.now().isoformat()
+            self.extraction_stats['duration_seconds'] = (
+                datetime.fromisoformat(self.extraction_stats['end_time']) - 
+                datetime.fromisoformat(self.extraction_stats['start_time'])
+            ).total_seconds()
+            
+            stats_file = Path(__file__).parent.parent / 'data' / 'extraction_log.json'
+            with open(stats_file, 'w', encoding='utf-8') as f:
+                json.dump(self.extraction_stats, f, indent=2, ensure_ascii=False)
+            
+            logger.info(f"Estadísticas guardadas en {stats_file}")
+            
+        except Exception as e:
+            logger.error(f"Error guardando estadísticas: {str(e)}")
 
+    # ...existing code...
+    
 
 async def main():
-    """Función principal"""
+    """Función principal con validación y reporte completo"""
     scraper = DroneScraperOrchestrator()
     
-    logger.info("Iniciando scraping de drones...")
-    results = await scraper.scrape_all_brands()
+    try:
+        logger.info("Iniciando scraping de drones...")
+        start_time = datetime.now()
+        
+        # Realizar scraping
+        results = await scraper.scrape_all_brands()
+        
+        logger.info(f"Scraping completado. Total de productos: {scraper.extraction_stats['total_products']}")
+        
+        # Limpiar y validar datos
+        cleaner = DataCleaner()
+        validator = DataValidator()
+        
+        all_drones = []
+        for brand, products in results.items():
+            all_drones.extend(products)
+        
+        if not all_drones:
+            logger.error("No se obtuvieron datos de ninguna marca")
+            return
+        
+        # Normalizar datos
+        logger.info("Normalizando datos...")
+        cleaned_data = cleaner.normalize_drone_dataset(all_drones)
+        
+        # Validar datos con esquema JSON
+        valid_data = []
+        validation_errors = []
+        
+        for drone in cleaned_data:
+            is_valid, errors = validator.validate_drone_data(drone)
+            if is_valid:
+                valid_data.append(drone)
+            else:
+                validation_errors.append({
+                    'drone': drone.get('modelo', 'Unknown'),
+                    'errors': errors
+                })
+        
+        # Crear directorio de salida
+        output_dir = Path(__file__).parent.parent / 'data' / 'processed'
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Guardar datos válidos
+        unified_path = output_dir / 'unified_drones.json'
+        with open(unified_path, 'w', encoding='utf-8') as f:
+            json.dump(valid_data, f, ensure_ascii=False, indent=2)
+        
+        # Guardar reporte de validación
+        validation_report = {
+            'timestamp': datetime.now().isoformat(),
+            'total_drones_input': len(all_drones),
+            'total_drones_cleaned': len(cleaned_data),
+            'total_drones_valid': len(valid_data),
+            'validation_errors': validation_errors,
+            'success_rate': (len(valid_data) / len(all_drones) * 100) if all_drones else 0
+        }
+        
+        validation_path = output_dir / 'validation_report.json'
+        with open(validation_path, 'w', encoding='utf-8') as f:
+            json.dump(validation_report, f, ensure_ascii=False, indent=2)
+        
+        # Análisis básico de calidad
+        if valid_data:
+            quality_stats = analyze_data_quality(valid_data)
+            
+            quality_path = output_dir / 'quality_analysis.json'
+            with open(quality_path, 'w', encoding='utf-8') as f:
+                json.dump(quality_stats, f, ensure_ascii=False, indent=2)
+        
+        # Crear metadatos del dataset
+        metadata = {
+            'dataset_info': {
+                'version': '1.0.0',
+                'created_at': datetime.now().isoformat(),
+                'total_drones': len(valid_data),
+                'brands_included': list(set(d['marca'] for d in valid_data)),
+                'data_sources': list(results.keys()),
+                'extraction_duration_minutes': (datetime.now() - start_time).total_seconds() / 60,
+                'schema_version': '1.0.0'
+            },
+            'field_completeness': {},
+            'data_quality_score': validation_report['success_rate']
+        }
+        
+        # Calcular completitud de campos
+        if valid_data:
+            total_drones = len(valid_data)
+            for field_path in ['especificaciones_tecnicas.peso_gramos', 'especificaciones_tecnicas.autonomia_minutos', 
+                              'especificaciones_tecnicas.alcance_metros', 'camara.resolucion_video']:
+                count = 0
+                for drone in valid_data:
+                    if '.' in field_path:
+                        parts = field_path.split('.')
+                        value = drone.get(parts[0], {}).get(parts[1])
+                    else:
+                        value = drone.get(field_path)
+                    
+                    if value is not None:
+                        count += 1
+                
+                metadata['field_completeness'][field_path] = {
+                    'count': count,
+                    'percentage': (count / total_drones * 100) if total_drones > 0 else 0
+                }
+        
+        metadata_path = output_dir / 'metadata.json'
+        with open(metadata_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
+        
+        # Log de resultados finales
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds() / 60
+        
+        logger.info(f"Proceso completado en {duration:.2f} minutos")
+        logger.info(f"Datos procesados guardados: {len(valid_data)} drones válidos de {len(all_drones)} extraídos")
+        logger.info(f"Tasa de éxito: {validation_report['success_rate']:.1f}%")
+        
+        if validation_errors:
+            logger.warning(f"Se encontraron {len(validation_errors)} errores de validación")
+        
+        # Mostrar resumen por marca
+        if valid_data:
+            brand_summary = {}
+            for drone in valid_data:
+                brand = drone.get('marca', 'Unknown')
+                brand_summary[brand] = brand_summary.get(brand, 0) + 1
+            
+            print(f"\n{'='*50}")
+            print("RESUMEN FINAL POR MARCA")
+            print(f"{'='*50}")
+            for brand, count in brand_summary.items():
+                print(f"{brand}: {count} drones válidos")
+            print(f"{'='*50}\n")
+        
+    except Exception as e:
+        logger.error(f"Error en proceso principal: {str(e)}")
+        raise
+
+
+def analyze_data_quality(drones: List[Dict]) -> Dict:
+    """Analizar calidad de los datos extraídos"""
+    if not drones:
+        return {}
     
-    logger.info(f"Scraping completado. Total de productos: {scraper.extraction_stats['total_products']}")
+    quality_stats = {
+        'total_drones': len(drones),
+        'completeness_by_field': {},
+        'brands_distribution': {},
+        'spec_ranges': {},
+        'common_issues': []
+    }
     
-    # Limpiar y validar datos
-    cleaner = DataCleaner()
-    validator = DataValidator()
+    # Distribución por marca
+    for drone in drones:
+        brand = drone.get('marca', 'Unknown')
+        quality_stats['brands_distribution'][brand] = quality_stats['brands_distribution'].get(brand, 0) + 1
     
-    all_drones = []
-    for brand, products in results.items():
-        all_drones.extend(products)
+    # Completitud por campo
+    fields_to_check = [
+        'modelo', 'especificaciones_tecnicas.peso_gramos', 'especificaciones_tecnicas.autonomia_minutos',
+        'especificaciones_tecnicas.alcance_metros', 'especificaciones_tecnicas.velocidad_max_kmh',
+        'camara.resolucion_video', 'camara.estabilizacion'
+    ]
     
-    # Normalizar y validar
-    cleaned_data = cleaner.normalize_drone_dataset(all_drones)
-    valid_data = [d for d in cleaned_data if validator.validate_drone_data(d)[0]]
+    for field in fields_to_check:
+        complete_count = 0
+        values = []
+        
+        for drone in drones:
+            if '.' in field:
+                parts = field.split('.')
+                value = drone.get(parts[0], {}).get(parts[1])
+            else:
+                value = drone.get(field)
+            
+            if value is not None and value != '':
+                complete_count += 1
+                if isinstance(value, (int, float)):
+                    values.append(float(value))
+        
+        quality_stats['completeness_by_field'][field] = {
+            'count': complete_count,
+            'percentage': (complete_count / len(drones)) * 100,
+            'total': len(drones)
+        }
+        
+        # Rangos para campos numéricos
+        if values and len(values) > 1:
+            quality_stats['spec_ranges'][field] = {
+                'min': min(values),
+                'max': max(values),
+                'avg': sum(values) / len(values),
+                'count': len(values)
+            }
     
-    # Guardar datos procesados
-    output_path = Path(__file__).parent.parent / 'data' / 'processed' / 'unified_drones.json'
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(valid_data, f, ensure_ascii=False, indent=2)
-    
-    logger.info(f"Datos procesados guardados: {len(valid_data)} drones válidos")
+    return quality_stats
 
 
 if __name__ == "__main__":
