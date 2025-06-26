@@ -1,7 +1,5 @@
-"""
-Drone Scraper Orchestrator
-Coordina la extracción de datos de DJI, Autel y Parrot
-"""
+# Drone Scraper Orchestrator
+# Coordina la extracción de datos de DJI, Autel y Parrot
 
 import asyncio
 import json
