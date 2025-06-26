@@ -1,0 +1,573 @@
+**Descripción:** Interfaz principal del comparador de drones
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DroneMatch Pro - Encuentra tu Drone Perfecto</title>
+    <meta name="description" content="Comparador inteligente de drones DJI, Autel y Parrot. Encuentra el drone perfecto según tu presupuesto y necesidades.">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Fuse.js para búsqueda -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+    
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">
+                    <i class="fas fa-helicopter"></i>
+                    DroneMatch Pro
+                </h1>
+                <nav class="main-nav">
+                    <button class="nav-btn active" data-section="comparator">
+                        <i class="fas fa-exchange-alt"></i>
+                        Comparador
+                    </button>
+                    <button class="nav-btn" data-section="insights">
+                        <i class="fas fa-chart-line"></i>
+                        Análisis
+                    </button>
+                    <button class="nav-btn" data-section="recommendations">
+                        <i class="fas fa-magic"></i>
+                        Recomendador
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="drone-comparator">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h2 class="hero-title">Encuentra el Drone Perfecto para Ti</h2>
+                <p class="hero-subtitle">Compara más de 50 modelos de DJI, Autel y Parrot con datos reales</p>
+                
+                <!-- Quick Filters -->
+                <div class="quick-filters">
+                    <button class="quick-filter-btn" data-profile="beginner">
+                        <i class="fas fa-user-graduate"></i>
+                        Soy Principiante
+                    </button>
+                    <button class="quick-filter-btn" data-profile="photographer">
+                        <i class="fas fa-camera"></i>
+                        Para Fotografía
+                    </button>
+                    <button class="quick-filter-btn" data-profile="professional">
+                        <i class="fas fa-video"></i>
+                        Uso Profesional
+                    </button>
+                    <button class="quick-filter-btn" data-profile="traveler">
+                        <i class="fas fa-plane"></i>
+                        Para Viajar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters Panel -->
+        <section id="filters-panel" class="filters-section">
+            <div class="container">
+                <div class="filters-header">
+                    <h3>Filtros Avanzados</h3>
+                    <button class="btn-text" id="reset-filters">
+                        <i class="fas fa-undo"></i>
+                        Restablecer
+                    </button>
+                </div>
+                
+                <div class="filters-grid">
+                    <!-- Presupuesto -->
+                    <div class="filter-group">
+                        <label for="budget-slider">
+                            <i class="fas fa-dollar-sign"></i>
+                            Presupuesto Máximo
+                        </label>
+                        <div class="range-container">
+                            <input type="range" id="budget-slider" min="0" max="10000" value="10000" step="100">
+                            <div class="range-values">
+                                <span>$0</span>
+                                <span id="budget-value" class="current-value">$10,000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marca -->
+                    <div class="filter-group">
+                        <label>
+                            <i class="fas fa-building"></i>
+                            Marca
+                        </label>
+                        <div class="toggle-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="brand" value="DJI" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">DJI</span>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="brand" value="Autel" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Autel</span>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="brand" value="Parrot" checked>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Parrot</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Nivel Usuario -->
+                    <div class="filter-group">
+                        <label>
+                            <i class="fas fa-user"></i>
+                            Nivel de Usuario
+                        </label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="user-level" value="all" checked>
+                                <span>Todos</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="user-level" value="principiante">
+                                <span>Principiante</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="user-level" value="intermedio">
+                                <span>Intermedio</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="user-level" value="avanzado">
+                                <span>Avanzado</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="user-level" value="profesional">
+                                <span>Profesional</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Uso Principal -->
+                    <div class="filter-group">
+                        <label>
+                            <i class="fas fa-tasks"></i>
+                            Uso Principal
+                        </label>
+                        <select id="primary-use" class="filter-select">
+                            <option value="all">Todos los usos</option>
+                            <option value="recreativo">Recreativo</option>
+                            <option value="fotografia">Fotografía</option>
+                            <option value="video_profesional">Video Profesional</option>
+                            <option value="cinematografia">Cinematografía</option>
+                            <option value="inspeccion">Inspección</option>
+                            <option value="carreras">Carreras</option>
+                            <option value="agricultura">Agricultura</option>
+                        </select>
+                    </div>
+
+                    <!-- Especificaciones -->
+                    <div class="filter-group spec-filters">
+                        <label>
+                            <i class="fas fa-cog"></i>
+                            Especificaciones Mínimas
+                        </label>
+                        <div class="spec-inputs">
+                            <div class="spec-input">
+                                <label for="min-autonomy">Autonomía (min)</label>
+                                <input type="number" id="min-autonomy" min="0" max="60" placeholder="20">
+                            </div>
+                            <div class="spec-input">
+                                <label for="min-range">Alcance (m)</label>
+                                <input type="number" id="min-range" min="0" max="20000" placeholder="1000">
+                            </div>
+                            <div class="spec-input">
+                                <label for="max-weight">Peso máx (g)</label>
+                                <input type="number" id="max-weight" min="0" max="5000" placeholder="1000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Características -->
+                    <div class="filter-group">
+                        <label>
+                            <i class="fas fa-star"></i>
+                            Características Requeridas
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="features" value="evita_obstaculos">
+                                <span><i class="fas fa-shield-alt"></i> Evita Obstáculos</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="features" value="retorno_automatico">
+                                <span><i class="fas fa-home"></i> Retorno Automático</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="features" value="seguimiento_objeto">
+                                <span><i class="fas fa-crosshairs"></i> Seguimiento</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="features" value="vuelo_nocturno">
+                                <span><i class="fas fa-moon"></i> Vuelo Nocturno</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="features" value="modo_sport">
+                                <span><i class="fas fa-tachometer-alt"></i> Modo Sport</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <div class="results-count">
+                        <span id="results-count">0</span> drones encontrados
+                    </div>
+                    <button class="btn-primary" id="apply-filters">
+                        <i class="fas fa-filter"></i>
+                        Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Grid -->
+        <section id="results-grid" class="results-section">
+            <div class="container">
+                <div class="results-header">
+                    <h3>Resultados</h3>
+                    <div class="sort-controls">
+                        <label>Ordenar por:</label>
+                        <select id="sort-select" class="sort-select">
+                            <option value="price_asc">Precio: Menor a Mayor</option>
+                            <option value="price_desc">Precio: Mayor a Menor</option>
+                            <option value="performance">Mejor Rendimiento</option>
+                            <option value="value">Mejor Valor</option>
+                            <option value="autonomy">Mayor Autonomía</option>
+                            <option value="range">Mayor Alcance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="drone-grid" class="drone-grid">
+                    <!-- Los drones se cargarán dinámicamente aquí -->
+                </div>
+
+                <!-- Paginación -->
+                <div class="pagination" id="pagination">
+                    <!-- Se generará dinámicamente -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Comparison -->
+        <section id="detailed-comparison" class="comparison-section" style="display: none;">
+            <div class="container">
+                <div class="comparison-header">
+                    <h3>Comparación Detallada</h3>
+                    <button class="btn-text" id="clear-comparison">
+                        <i class="fas fa-times"></i>
+                        Limpiar
+                    </button>
+                </div>
+                
+                <div class="comparison-info">
+                    <i class="fas fa-info-circle"></i>
+                    Selecciona hasta 5 drones para comparar lado a lado
+                </div>
+
+                <div id="comparison-table" class="comparison-table">
+                    <!-- La tabla de comparación se generará dinámicamente -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Market Insights -->
+        <section id="market-insights" class="insights-section" style="display: none;">
+            <div class="container">
+                <h3>Análisis del Mercado</h3>
+                
+                <div class="insights-grid">
+                    <!-- Gráfico de Precio vs Rendimiento -->
+                    <div class="insight-card">
+                        <h4>Precio vs Rendimiento</h4>
+                        <div class="chart-container">
+                            <canvas id="price-performance-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Distribución por Marca -->
+                    <div class="insight-card">
+                        <h4>Distribución por Marca</h4>
+                        <div class="chart-container">
+                            <canvas id="brand-distribution-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Adopción de Características -->
+                    <div class="insight-card">
+                        <h4>Características Más Comunes</h4>
+                        <div class="chart-container">
+                            <canvas id="features-adoption-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Rangos de Precio -->
+                    <div class="insight-card">
+                        <h4>Distribución de Precios</h4>
+                        <div class="chart-container">
+                            <canvas id="price-ranges-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Insights -->
+                <div class="key-insights">
+                    <h4>Insights Clave</h4>
+                    <div id="insights-list" class="insights-list">
+                        <!-- Los insights se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recommendations Section -->
+        <section id="recommendations-section" class="recommendations" style="display: none;">
+            <div class="container">
+                <h3>Recomendador Inteligente</h3>
+                
+                <div class="recommendation-wizard">
+                    <div class="wizard-steps">
+                        <div class="wizard-step active" data-step="1">
+                            <span class="step-number">1</span>
+                            <span class="step-label">Presupuesto</span>
+                        </div>
+                        <div class="wizard-step" data-step="2">
+                            <span class="step-number">2</span>
+                            <span class="step-label">Experiencia</span>
+                        </div>
+                        <div class="wizard-step" data-step="3">
+                            <span class="step-number">3</span>
+                            <span class="step-label">Uso</span>
+                        </div>
+                        <div class="wizard-step" data-step="4">
+                            <span class="step-number">4</span>
+                            <span class="step-label">Características</span>
+                        </div>
+                    </div>
+
+                    <div class="wizard-content">
+                        <!-- Step 1: Budget -->
+                        <div class="wizard-panel active" data-panel="1">
+                            <h4>¿Cuál es tu presupuesto máximo?</h4>
+                            <div class="budget-options">
+                                <button class="budget-option" data-budget="500">
+                                    <i class="fas fa-piggy-bank"></i>
+                                    <span class="budget-label">Económico</span>
+                                    <span class="budget-range">Hasta $500</span>
+                                </button>
+                                <button class="budget-option" data-budget="1500">
+                                    <i class="fas fa-wallet"></i>
+                                    <span class="budget-label">Intermedio</span>
+                                    <span class="budget-range">$500 - $1,500</span>
+                                </button>
+                                <button class="budget-option" data-budget="3000">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span class="budget-label">Avanzado</span>
+                                    <span class="budget-range">$1,500 - $3,000</span>
+                                </button>
+                                <button class="budget-option" data-budget="10000">
+                                    <i class="fas fa-gem"></i>
+                                    <span class="budget-label">Premium</span>
+                                    <span class="budget-range">$3,000+</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Experience -->
+                        <div class="wizard-panel" data-panel="2">
+                            <h4>¿Cuál es tu nivel de experiencia?</h4>
+                            <div class="experience-options">
+                                <button class="experience-option" data-level="principiante">
+                                    <i class="fas fa-baby"></i>
+                                    <span class="exp-label">Principiante</span>
+                                    <span class="exp-desc">Nunca he volado un drone</span>
+                                </button>
+                                <button class="experience-option" data-level="intermedio">
+                                    <i class="fas fa-user"></i>
+                                    <span class="exp-label">Intermedio</span>
+                                    <span class="exp-desc">Tengo algo de experiencia</span>
+                                </button>
+                                <button class="experience-option" data-level="avanzado">
+                                    <i class="fas fa-user-tie"></i>
+                                    <span class="exp-label">Avanzado</span>
+                                    <span class="exp-desc">Vuelo regularmente</span>
+                                </button>
+                                <button class="experience-option" data-level="profesional">
+                                    <i class="fas fa-user-astronaut"></i>
+                                    <span class="exp-label">Profesional</span>
+                                    <span class="exp-desc">Uso comercial/profesional</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Use Case -->
+                        <div class="wizard-panel" data-panel="3">
+                            <h4>¿Para qué usarás principalmente el drone?</h4>
+                            <div class="use-options">
+                                <button class="use-option" data-use="recreativo">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span class="use-label">Diversión</span>
+                                </button>
+                                <button class="use-option" data-use="fotografia">
+                                    <i class="fas fa-camera"></i>
+                                    <span class="use-label">Fotografía</span>
+                                </button>
+                                <button class="use-option" data-use="video_profesional">
+                                    <i class="fas fa-video"></i>
+                                    <span class="use-label">Video</span>
+                                </button>
+                                <button class="use-option" data-use="inspeccion">
+                                    <i class="fas fa-search"></i>
+                                    <span class="use-label">Inspección</span>
+                                </button>
+                                <button class="use-option" data-use="carreras">
+                                    <i class="fas fa-flag-checkered"></i>
+                                    <span class="use-label">Carreras</span>
+                                </button>
+                                <button class="use-option" data-use="viajes">
+                                    <i class="fas fa-globe"></i>
+                                    <span class="use-label">Viajes</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Features -->
+                        <div class="wizard-panel" data-panel="4">
+                            <h4>¿Qué características son importantes para ti?</h4>
+                            <div class="feature-options">
+                                <label class="feature-option">
+                                    <input type="checkbox" value="evita_obstaculos">
+                                    <div class="feature-card">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <span>Evitación de Obstáculos</span>
+                                    </div>
+                                </label>
+                                <label class="feature-option">
+                                    <input type="checkbox" value="retorno_automatico">
+                                    <div class="feature-card">
+                                        <i class="fas fa-home"></i>
+                                        <span>Retorno Automático</span>
+                                    </div>
+                                </label>
+                                <label class="feature-option">
+                                    <input type="checkbox" value="seguimiento_objeto">
+                                    <div class="feature-card">
+                                        <i class="fas fa-crosshairs"></i>
+                                        <span>Seguimiento de Objetos</span>
+                                    </div>
+                                </label>
+                                <label class="feature-option">
+                                    <input type="checkbox" value="vuelo_nocturno">
+                                    <div class="feature-card">
+                                        <i class="fas fa-moon"></i>
+                                        <span>Vuelo Nocturno</span>
+                                    </div>
+                                </label>
+                                <label class="feature-option">
+                                    <input type="checkbox" value="modo_sport">
+                                    <div class="feature-card">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span>Modo Sport</span>
+                                    </div>
+                                </label>
+                                <label class="feature-option">
+                                    <input type="checkbox" value="camara_4k">
+                                    <div class="feature-card">
+                                        <i class="fas fa-film"></i>
+                                        <span>Cámara 4K+</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-navigation">
+                        <button class="btn-secondary" id="wizard-prev" style="display: none;">
+                            <i class="fas fa-arrow-left"></i>
+                            Anterior
+                        </button>
+                        <button class="btn-primary" id="wizard-next">
+                            Siguiente
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="btn-success" id="wizard-finish" style="display: none;">
+                            <i class="fas fa-magic"></i>
+                            Ver Recomendaciones
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recommendations Results -->
+                <div id="recommendation-results" class="recommendation-results" style="display: none;">
+                    <h4>Nuestras Recomendaciones para Ti</h4>
+                    <div id="recommended-drones" class="recommended-drones">
+                        <!-- Las recomendaciones se cargarán aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>&copy; 2024 DroneMatch Pro - Proyecto Académico</p>
+                    <p>Datos recopilados con fines educativos</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#" id="about-link">Acerca de</a>
+                    <a href="#" id="methodology-link">Metodología</a>
+                    <a href="#" id="contact-link">Contacto</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Drone Detail Modal -->
+    <div id="drone-detail-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div id="drone-detail-content">
+                <!-- El contenido se cargará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js" type="module"></script>
+    <script src="charts.js" type="module"></script>
+    <script src="filters.js" type="module"></script>
+</body>
+</html>
