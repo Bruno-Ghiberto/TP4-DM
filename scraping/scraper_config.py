@@ -20,25 +20,21 @@ SCRAPER_CONFIG = {
         'infinite_scroll': False,
         'max_products': 30,
         'delay_between_requests': 3,
-        'direct_product_urls': True,  # URLs directas a productos específicos
+        'direct_product_urls': True,
         'selectors': {
-            'product_list': '.product-list-item, .product-card, .hero-product',
-            'product_link': 'a[href*="/"], a.product-link',
-            'product_name': 'h1, .style__visual-hidden___32pnD, .product-title, .hero-product-name, .page-title, .product-name h1, [class*="title"]',
-            'specs_table': '.specs-table, .specifications-table, .product-specs, .tech-specs, table',
-            'camera_section': '.camera-specs, .gimbal-camera, [data-section="camera"], .imaging-specs',
-            'features_section': '.features-list, .product-features, .intelligent-features, .key-features'
+            # Selectores específicos para DJI basados en análisis del DOM
+            'product_name': 'h1.style_title__lBlWu, h1[class*="title"], .product-name h1',
+            'specs_section': 'div[class*="specs"], section[class*="specification"]',
+            'weight': '[data-test*="weight"], div:contains("Takeoff Weight") + div, div:contains("Weight") + div',
+            'flight_time': '[data-test*="flight-time"], div:contains("Flight Time") + div, div:contains("Max Flight Time") + div',
+            'range': '[data-test*="transmission"], div:contains("Transmission Range") + div, div:contains("Max Range") + div',
+            'camera': '[data-test*="camera"], div:contains("Camera") + div, div[class*="camera-specs"]',
+            'specs_list': 'ul[class*="spec-list"] li, div[class*="spec-item"]'
         },
-        'api_endpoints': {
-            'products': '/api/products',
-            'specs': '/api/product/specs/{product_id}'
-        },
-        'headers': {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-        }
+        'wait_for_elements': [
+            'div[class*="specs"]',
+            'section[class*="specification"]'
+        ]
     },
     
     'autel': {
@@ -57,24 +53,25 @@ SCRAPER_CONFIG = {
         'requires_js': True,
         'infinite_scroll': False,
         'max_products': 20,
-        'delay_between_requests': 4,  # Más conservador con Autel
-        'direct_product_urls': True,  # URLs directas a productos específicos
+        'delay_between_requests': 4,
+        'direct_product_urls': True,
         'selectors': {
-            'product_list': '.product-item, .drone-card, .product-box, .product-detail',
-            'product_link': 'a.product-link, a[href*="/productdetail/"]',
-            'product_name': 'h1, h2, .product-name, .product-title, .page-title, .product-detail-title, [class*="title"]',
-            'specs_table': '.specifications, .specs-content, .product-parameters, .tech-specs, table',
-            'camera_section': '.camera-parameters, .payload-specs, .imaging-system',
-            'features_section': '.features, .product-highlights, .key-features'
+            # Selectores específicos para Autel
+            'product_name': 'h1.product-title, .product-name h1, h1[class*="title"]',
+            'specs_section': '.product-specs, .specifications-section, div[class*="specification"]',
+            'specs_table': 'table.specs-table, .product-parameters table',
+            'weight': 'td:contains("Weight") + td, th:contains("Weight") + td',
+            'flight_time': 'td:contains("Flight Time") + td, th:contains("Flight Time") + td',
+            'range': 'td:contains("Range") + td, th:contains("Control Distance") + td',
+            'specs_accordion': '.accordion-item, .spec-accordion'
         },
-        'special_handling': {
-            'wait_for_element': '.product-loaded',
-            'scroll_to_load': True,
-            'ajax_wait': 2
-        }
-    },
-    
-    'parrot': {
+        'wait_for_elements': [
+            '.product-specs',
+            '.specifications-section'
+        ]
+},
+
+'parrot': {
         'base_url': 'https://www.parrot.com',
         'product_urls': [
             'https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-Ai-product-sheet.pdf',
