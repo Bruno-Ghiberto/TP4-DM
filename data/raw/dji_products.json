@@ -3,7 +3,7 @@
     "marca": "DJI",
     "url_fuente": "https://www.dji.com/mavic-3-pro/specs",
     "metadata": {
-      "fecha_extraccion": "2025-06-27T12:02:06.418001",
+      "fecha_extraccion": "2025-06-27T12:38:02.961547",
       "version_scraper": "1.0.0",
       "confiabilidad_datos": "alta"
     },
@@ -42,6 +42,411 @@
       "categoria_peso": "ultraligero",
       "nivel_usuario": "principiante",
       "uso_principal": [
+        "principiantes"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/mavic-3-classic/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:09.331726",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": 5000.0,
+      "altitud_max_metros": 6000.0,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": 8.0,
+      "velocidad_descenso_ms": 6.0,
+      "tiempo_hover_minutos": 40.0
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": "mecanica",
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "principiantes"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/air-3s/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:15.415793",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": 4276.0,
+      "altitud_max_metros": 6000.0,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": 10.0,
+      "velocidad_descenso_ms": 10.0,
+      "tiempo_hover_minutos": 41.0
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": "mecanica",
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": true,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "principiantes"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/air-3/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:21.749449",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": 4241.0,
+      "altitud_max_metros": 6000.0,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": 10.0,
+      "velocidad_descenso_ms": 10.0,
+      "tiempo_hover_minutos": 42.0
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": "mecanica",
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": false,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "principiantes"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/mini-4-pro/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:28.210875",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": null,
+      "altitud_max_metros": null,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": 5.0,
+      "velocidad_descenso_ms": 5.0,
+      "tiempo_hover_minutos": 30.0
+    },
+    "camara": {
+      "resolucion_video": null,
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": "mecanica",
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": true,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "principiantes"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/mini-3/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:34.536106",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": null,
+      "altitud_max_metros": null,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": 5.0,
+      "velocidad_descenso_ms": 3.5,
+      "tiempo_hover_minutos": 33.0
+    },
+    "camara": {
+      "resolucion_video": "4K",
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": "mecanica",
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": true,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "fotografia_profesional",
+        "videografia"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/flip/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:40.589808",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": 3110.0,
+      "altitud_max_metros": 3000.0,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": 5.0,
+      "velocidad_descenso_ms": 5.0,
+      "tiempo_hover_minutos": 28.0
+    },
+    "camara": {
+      "resolucion_video": "4K",
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": "mecanica",
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": true,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "fotografia_profesional",
+        "videografia"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/avata-2/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:47.317283",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": 2150.0,
+      "altitud_max_metros": 5000.0,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": null,
+      "velocidad_descenso_ms": null,
+      "tiempo_hover_minutos": null
+    },
+    "camara": {
+      "resolucion_video": "4K",
+      "fps_max": null,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": false,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": true,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "fotografia_profesional",
+        "videografia"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  },
+  {
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/inspire-3/specs",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T12:38:53.876016",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Specs",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": 4280.0,
+      "altitud_max_metros": null,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": 8.0,
+      "velocidad_descenso_ms": null,
+      "tiempo_hover_minutos": null
+    },
+    "camara": {
+      "resolucion_video": "4K",
+      "fps_max": 60,
+      "sensor_tamaño": null,
+      "estabilizacion": null,
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "retorno_automatico": true,
+      "seguimiento_objeto": false,
+      "vuelo_nocturno": false,
+      "modo_sport": true,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "fotografia_profesional",
+        "videografia",
         "principiantes"
       ],
       "certificaciones": [

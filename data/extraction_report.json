@@ -1,16 +1,16 @@
 {
   "resumen_extraccion": {
-    "fecha_inicio": "2025-06-27T12:01:57.125524",
-    "fecha_fin": "2025-06-27T12:03:46.662137",
-    "duracion_segundos": 109.536613,
-    "duracion_minutos": 1.83,
-    "total_drones_extraidos": 4,
+    "fecha_inicio": "2025-06-27T12:37:54.461716",
+    "fecha_fin": "2025-06-27T12:48:46.088543",
+    "duracion_segundos": 651.626827,
+    "duracion_minutos": 10.86,
+    "total_drones_extraidos": 20,
     "total_errores": 0,
     "marcas_procesadas": 3
   },
   "detalle_por_marca": {
-    "dji": 1,
-    "autel": 1,
+    "dji": 9,
+    "autel": 9,
     "parrot": 2
   },
   "errores_encontrados": [],

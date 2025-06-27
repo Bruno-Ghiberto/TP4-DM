@@ -1,11 +1,77 @@
 {
-  "timestamp": "2025-06-27T12:03:46.683212",
-  "total_drones_input": 4,
-  "total_drones_cleaned": 2,
+  "timestamp": "2025-06-27T12:48:46.171462",
+  "total_drones_input": 20,
+  "total_drones_cleaned": 13,
   "total_drones_valid": 0,
   "validation_errors": [
     {
+      "drone": "Specs",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Specs",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Specs",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Specs",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
       "drone": "Unknown Model",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Alpha",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Unknown Model",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Unknown Model",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Unknown Model",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Unknown Model",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Unknown Model",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "Dragonfish Series",
       "errors": [
         "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
       ]

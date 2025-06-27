@@ -4,7 +4,7 @@
     "modelo": "ANAFI Ai",
     "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-Ai-product-sheet.pdf",
     "metadata": {
-      "fecha_extraccion": "2025-06-27T12:03:36.732826",
+      "fecha_extraccion": "2025-06-27T12:48:36.162761",
       "version_scraper": "1.0.0",
       "confiabilidad_datos": "media",
       "tipo_fuente": "pdf"
@@ -35,7 +35,7 @@
     "modelo": "ANAFI USA",
     "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-USA-product-sheet.pdf",
     "metadata": {
-      "fecha_extraccion": "2025-06-27T12:03:40.642489",
+      "fecha_extraccion": "2025-06-27T12:48:40.061162",
       "version_scraper": "1.0.0",
       "confiabilidad_datos": "media",
       "tipo_fuente": "pdf"
