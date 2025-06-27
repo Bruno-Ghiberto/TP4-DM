@@ -1,4 +1,3 @@
-
 #Data Cleaner - Normalización y limpieza de datos de drones
 #Unifica formatos y asegura consistencia de datos
 
@@ -107,8 +106,14 @@ class DataCleaner:
             price_str = price_str.strip()
             
             # Manejar diferentes formatos de números
-            # Formato americano: 1,234.56
-            if ',' in price_str and '.' in price_str:
+            # Detectar formato antes de procesar
+            if re.match(r'^\d{1,3}(,\d{3})*(\.\d{2})?$', price_str):
+                # Formato americano: 1,234.56
+                price_str = price_str.replace(',', '')
+            elif re.match(r'^\d{1,3}(\.\d{3})*(,\d{2})?$', price_str):
+                # Formato europeo: 1.234,56
+                price_str = price_str.replace('.', '').replace(',', '.')
+            elif ',' in price_str and '.' in price_str:
                 if price_str.rindex(',') < price_str.rindex('.'):
                     price_str = price_str.replace(',', '')
                 else:
@@ -147,7 +152,7 @@ class DataCleaner:
         
         Args:
             text: Texto con número y unidad
-            unit_type: Tipo de unidad ('grams', 'meters', 'minutes', 'kmh', 'fps')
+            unit_type: Tipo de unidad ('grams', 'meters', 'minutes', 'kmh', 'fps', 'mah', 'ms')
         
         Returns:
             Valor numérico en unidad estándar
@@ -202,6 +207,24 @@ class DataCleaner:
                 # Frames per second, no necesita conversión
                 return value
             
+            # === NUEVOS TIPOS DE UNIDAD ===
+            elif unit_type == 'mah':
+                # miliAmperios hora para capacidad de batería
+                if 'ah' in text and 'mah' not in text:
+                    # Convertir Ah a mAh
+                    return value * 1000
+                return value
+            
+            elif unit_type == 'ms':
+                # metros por segundo para velocidades verticales
+                if 'km/h' in text or 'kmh' in text:
+                    # Convertir km/h a m/s
+                    return value / 3.6
+                elif 'ft/s' in text or 'fps' in text:
+                    # Convertir ft/s a m/s
+                    return value * 0.3048
+                return value
+            
             else:
                 # Tipo desconocido, retornar valor sin conversión
                 return value
@@ -221,12 +244,20 @@ class DataCleaner:
             Especificaciones normalizadas
         """
         standard_specs = {
+            # === ESPECIFICACIONES BÁSICAS ===
             'peso_gramos': None,
             'autonomia_minutos': None,
             'alcance_metros': None,
             'velocidad_max_kmh': None,
             'resistencia_viento': None,
-            'temperatura_operacion': None
+            'temperatura_operacion': None,
+            # === NUEVAS ESPECIFICACIONES ===
+            'capacidad_bateria_mah': None,
+            'altitud_max_metros': None,
+            'temperatura_operativa': None,
+            'velocidad_ascenso_ms': None,
+            'velocidad_descenso_ms': None,
+            'tiempo_hover_minutos': None
         }
         
         # Mapeo de posibles nombres de campos
@@ -236,7 +267,14 @@ class DataCleaner:
             'alcance_metros': ['range', 'transmission_range', 'control_range', 'alcance'],
             'velocidad_max_kmh': ['max_speed', 'top_speed', 'velocity', 'speed'],
             'resistencia_viento': ['wind_resistance', 'wind_speed', 'max_wind'],
-            'temperatura_operacion': ['operating_temp', 'temperature_range', 'temp_range']
+            'temperatura_operacion': ['operating_temp', 'temperature_range', 'temp_range'],
+            # === NUEVOS MAPEOS ===
+            'capacidad_bateria_mah': ['battery_capacity', 'capacity', 'capacidad_bateria_mah'],
+            'altitud_max_metros': ['max_altitude', 'service_ceiling', 'altitud_max_metros'],
+            'temperatura_operativa': ['operating_temperature', 'working_temperature', 'temperatura_operativa'],
+            'velocidad_ascenso_ms': ['ascent_speed', 'max_ascent_speed', 'velocidad_ascenso_ms'],
+            'velocidad_descenso_ms': ['descent_speed', 'max_descent_speed', 'velocidad_descenso_ms'],
+            'tiempo_hover_minutos': ['hover_time', 'max_hover_time', 'tiempo_hover_minutos']
         }
         
         # Buscar valores en diferentes campos posibles
@@ -254,8 +292,17 @@ class DataCleaner:
                         standard_specs[standard_field] = self.extract_number(str(value), 'meters')
                     elif standard_field == 'velocidad_max_kmh':
                         standard_specs[standard_field] = self.extract_number(str(value), 'kmh')
+                    # === NUEVOS PROCESADORES ===
+                    elif standard_field == 'capacidad_bateria_mah':
+                        standard_specs[standard_field] = self.extract_number(str(value), 'mah')
+                    elif standard_field == 'altitud_max_metros':
+                        standard_specs[standard_field] = self.extract_number(str(value), 'meters')
+                    elif standard_field in ['velocidad_ascenso_ms', 'velocidad_descenso_ms']:
+                        standard_specs[standard_field] = self.extract_number(str(value), 'ms')
+                    elif standard_field == 'tiempo_hover_minutos':
+                        standard_specs[standard_field] = self.extract_number(str(value), 'minutes')
                     else:
-                        # Campos de texto
+                        # Campos de texto (incluye temperatura_operativa)
                         standard_specs[standard_field] = str(value).strip()
                     
                     break
@@ -389,6 +436,10 @@ class DataCleaner:
         
         for drone in drones:
             try:
+                # Normalizar marca
+                if 'marca' in drone:
+                    drone['marca'] = self.normalize_brand(drone['marca'])
+                
                 # Normalizar especificaciones
                 if 'especificaciones_tecnicas' in drone:
                     drone['especificaciones_tecnicas'] = self.standardize_specifications(
@@ -494,6 +545,23 @@ class DataCleaner:
                     }
         
         return report
+    
+    def normalize_brand(self, brand: str) -> str:
+        """Normalizar nombre de marca a formato estándar"""
+        if not brand:
+            return ""
+        
+        brand_lower = brand.lower().strip()
+        
+        # Mapeo de marcas
+        brand_mapping = {
+            'dji': 'DJI',
+            'autel': 'Autel', 
+            'parrot': 'Parrot'
+        }
+        
+        return brand_mapping.get(brand_lower, brand.title())
+        
 
 
 if __name__ == "__main__":

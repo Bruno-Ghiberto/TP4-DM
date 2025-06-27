@@ -6,15 +6,15 @@ SCRAPER_CONFIG = {
     'dji': {
         'base_url': 'https://www.dji.com',
         'product_urls': [
-            'https://www.dji.com/mavic-3-pro',
-            'https://www.dji.com/mavic-3-classic',
-            'https://www.dji.com/air-3s',
-            'https://www.dji.com/air-3',
-            'https://www.dji.com/mini-4-pro',
-            'https://www.dji.com/mini-3',
-            'https://www.dji.com/flip',
-            'https://www.dji.com/avata-2',
-            'https://www.dji.com/inspire-3'
+            'https://www.dji.com/mavic-3-pro/specs',
+            'https://www.dji.com/mavic-3-classic/specs',
+            'https://www.dji.com/air-3s/specs',
+            'https://www.dji.com/air-3/specs',
+            'https://www.dji.com/mini-4-pro/specs',
+            'https://www.dji.com/mini-3/specs',
+            'https://www.dji.com/flip/specs',
+            'https://www.dji.com/avata-2/specs',
+            'https://www.dji.com/inspire-3/specs',
         ],
         'requires_js': True,
         'infinite_scroll': False,
@@ -25,12 +25,22 @@ SCRAPER_CONFIG = {
             # Selectores específicos para DJI basados en análisis del DOM
             'product_name': 'h1.style_title__lBlWu, h1[class*="title"], .product-name h1',
             'specs_section': 'div[class*="specs"], section[class*="specification"]',
-            'weight': '[data-test*="weight"], div:contains("Takeoff Weight") + div, div:contains("Weight") + div',
-            'flight_time': '[data-test*="flight-time"], div:contains("Flight Time") + div, div:contains("Max Flight Time") + div',
-            'range': '[data-test*="transmission"], div:contains("Transmission Range") + div, div:contains("Max Range") + div',
+            'weight': '//div[contains(text(), "Weight") or contains(text(), "weight")]/following-sibling::div[1]',
+            'flight_time': '//div[contains(text(), "Flight Time") or contains(text(), "flight time")]/following-sibling::div[1]',
+            'range': '//div[contains(text(), "Transmission") or contains(text(), "Range")]/following-sibling::div[1]',
             'camera': '[data-test*="camera"], div:contains("Camera") + div, div[class*="camera-specs"]',
-            'specs_list': 'ul[class*="spec-list"] li, div[class*="spec-item"]'
+            'specs_list': 'ul[class*="spec-list"] li, div[class*="spec-item"]',
+            # === NUEVOS SELECTORES ===
+            'battery_capacity': '//div[contains(text(), "Battery") or contains(text(), "Capacity")]/following-sibling::div[1]',
+            'max_altitude': '//div[contains(text(), "Altitude") or contains(text(), "Service Ceiling")]/following-sibling::div[1]',
+            'operating_temperature': '//div[contains(text(), "Operating Temperature") or contains(text(), "Temperature")]/following-sibling::div[1]',
+            'ascent_speed': '//div[contains(text(), "Ascent") or contains(text(), "Ascent Speed")]/following-sibling::div[1]',
+            'descent_speed': '//div[contains(text(), "Descent") or contains(text(), "Descent Speed")]/following-sibling::div[1]',
+            'hover_time': '//div[contains(text(), "Hover") or contains(text(), "Hover Time")]/following-sibling::div[1]'
         },
+        'use_xpath': True,  # DJI requiere XPath para contenido dinámico
+        'scroll_before_extract': True,
+        'wait_after_scroll': 3,
         'wait_for_elements': [
             'div[class*="specs"]',
             'section[class*="specification"]'
@@ -40,15 +50,15 @@ SCRAPER_CONFIG = {
     'autel': {
         'base_url': 'https://www.autelrobotics.com',
         'product_urls': [
-            'https://www.autelrobotics.com/productdetail/evo-lite-enterprise-series/',
-            'https://www.autelrobotics.com/productdetail/autel-alpha',
-            'https://www.autelrobotics.com/productdetail/evo-max-4t/',
-            'https://www.autelrobotics.com/productdetail/evo-max-4n/',
-            'https://www.autelrobotics.com/productdetail/evo-ii-enterprise-drones',
-            'https://www.autelrobotics.com/productdetail/evo-ii-dual-640t-drones/',
-            'https://www.autelrobotics.com/productdetail/evo-ii-rtk-series-drones/',
-            'https://www.autelrobotics.com/productdetail/evo-ii-pro-drones/',
-            'https://www.autelrobotics.com/productdetail/dragonfish-series-drones/'
+            'https://www.autelrobotics.com/productdetail/evo-lite-enterprise-series/#jsgg',
+            'https://www.autelrobotics.com/productdetail/autel-alpha/#jsgg',
+            'https://www.autelrobotics.com/productdetail/evo-max-4t/#jsgg',
+            'https://www.autelrobotics.com/productdetail/evo-max-4n/#jsgg',
+            'https://www.autelrobotics.com/productdetail/evo-ii-enterprise-drones/#jsgg',
+            'https://www.autelrobotics.com/productdetail/evo-ii-dual-640t-drones/#jsgg',
+            'https://www.autelrobotics.com/productdetail/evo-ii-rtk-series-drones/#jsgg',
+            'https://www.autelrobotics.com/productdetail/evo-ii-pro-drones/#jsgg',
+            'https://www.autelrobotics.com/productdetail/dragonfish-series-drones/#jsgg',
         ],
         'requires_js': True,
         'infinite_scroll': False,
@@ -63,7 +73,14 @@ SCRAPER_CONFIG = {
             'weight': 'td:contains("Weight") + td, th:contains("Weight") + td',
             'flight_time': 'td:contains("Flight Time") + td, th:contains("Flight Time") + td',
             'range': 'td:contains("Range") + td, th:contains("Control Distance") + td',
-            'specs_accordion': '.accordion-item, .spec-accordion'
+            'specs_accordion': '.accordion-item, .spec-accordion',
+            # === NUEVOS SELECTORES ===
+            'battery_capacity': 'td:contains("Battery") + td, td:contains("Capacity") + td',
+            'max_altitude': 'td:contains("Altitude") + td, td:contains("Service Ceiling") + td',
+            'operating_temperature': 'td:contains("Temperature") + td, td:contains("Operating Temperature") + td',
+            'ascent_speed': 'td:contains("Ascent") + td, td:contains("Ascent Speed") + td',
+            'descent_speed': 'td:contains("Descent") + td, td:contains("Descent Speed") + td',
+            'hover_time': 'td:contains("Hover") + td, td:contains("Hover Time") + td'
         },
         'wait_for_elements': [
             '.product-specs',
@@ -98,7 +115,14 @@ SCRAPER_CONFIG = {
                 r'Flight time:\s*(\d+)\s*(min|minutes)',
                 r'Range:\s*(\d+\.?\d*)\s*(km|m)',
                 r'Video resolution:\s*([48]K|1080p|720p)',
-                r'Max speed:\s*(\d+\.?\d*)\s*(km/h|m/s)'
+                r'Max speed:\s*(\d+\.?\d*)\s*(km/h|m/s)',
+                # === NUEVOS PATRONES ===
+                r'Battery capacity:\s*(\d+)\s*(mAh|mah)',
+                r'Service ceiling:\s*(\d+\.?\d*)\s*(m|ft)',
+                r'Operating temperature:\s*(-?\d+\.?\d*)\s*to\s*(\d+\.?\d*)\s*°C',
+                r'Max ascent speed:\s*(\d+\.?\d*)\s*(m/s|km/h)',
+                r'Max descent speed:\s*(\d+\.?\d*)\s*(m/s|km/h)',
+                r'Hover time:\s*(\d+)\s*(min|minutes)'
             ]
         },
         'locale_handling': {
@@ -122,37 +146,69 @@ ETHICAL_SCRAPING_CONFIG = {
     'max_redirects': 3
 }
 
-# Mapeo de especificaciones técnicas estándar
+# Mapeo ampliado de especificaciones técnicas para scraping en DJI, Autel y Parrot
 SPEC_MAPPINGS = {
+    # === ESPECIFICACIONES BÁSICAS ===
     'weight': {
-        'dji': ['takeoff weight', 'weight', 'aircraft weight'],
-        'autel': ['weight', 'takeoff weight', 'max takeoff weight'],
-        'parrot': ['weight', 'total weight', 'drone weight']
+        'dji':   ['takeoff weight', 'weight', 'aircraft weight'],
+        'autel': ['weight', 'takeoff weight', 'max takeoff weight', 'maximum takeoff weight'],
+        'parrot': ['weight', 'total weight', 'drone weight', 'mass']
     },
     'flight_time': {
-        'dji': ['max flight time', 'flight time', 'hovering time'],
-        'autel': ['flight time', 'max flight time', 'endurance'],
-        'parrot': ['flight time', 'autonomy', 'battery life']
+        'dji':   ['max flight time', 'maximum flight time', 'flight time', 'max hover time', 'hovering time'],
+        'autel': ['maximum flight time', 'max flight time', 'flight time', 'maximum hover time', 'hover time'],
+        'parrot': ['maximum flight time', 'max flight time', 'flight time', 'autonomy', 'battery life']
     },
     'range': {
-        'dji': ['max transmission range', 'control range', 'transmission distance'],
-        'autel': ['transmission range', 'control distance', 'max range'],
+        'dji':   ['max transmission range', 'transmission range', 'control range', 'max transmission distance', 'transmission distance'],
+        'autel': ['maximum signal effective distance', 'signal effective distance', 'transmission range', 'control distance', 'max range'],
         'parrot': ['range', 'transmission range', 'control range']
     },
     'max_speed': {
-        'dji': ['max speed', 'max flight speed', 'max horizontal speed'],
-        'autel': ['max speed', 'top speed', 'maximum velocity'],
-        'parrot': ['max speed', 'maximum speed', 'top speed']
+        'dji':   ['max horizontal speed', 'maximum flight speed', 'max speed', 'max flight speed'],
+        'autel': ['maximum horizontal flight speed', 'max speed', 'top speed', 'maximum horizontal speed'],
+        'parrot': ['maximum horizontal speed', 'max speed', 'maximum speed', 'top speed']
     },
     'camera_resolution': {
-        'dji': ['video resolution', 'max video resolution', 'recording resolution'],
-        'autel': ['video resolution', 'recording modes', 'video recording'],
-        'parrot': ['video resolution', 'video modes', 'recording resolution']
+        'dji':   ['video resolution', 'max video resolution', 'recording resolution', 'image resolution', 'photo resolution'],
+        'autel': ['video resolution', 'recording modes', 'video recording', 'camera resolution', 'visible-light camera resolution', 'thermal imaging resolution'],
+        'parrot': ['video resolution', 'video modes', 'recording resolution', 'photo resolution', 'sensor']
     },
     'wind_resistance': {
-        'dji': ['max wind speed resistance', 'wind resistance', 'max windspeed'],
-        'autel': ['wind resistance', 'max wind speed', 'wind rating'],
-        'parrot': ['wind resistance', 'maximum wind', 'wind conditions']
+        'dji':   ['max wind speed resistance', 'wind resistance', 'max wind speed', 'wind speed resistance'],
+        'autel': ['maximum wind speed resistance', 'wind resistance', 'max wind speed', 'wind rating'],
+        'parrot': ['maximum wind resistance', 'wind resistance', 'max wind speed resistance', 'wind speed resistance']
+    },
+
+    'battery_capacity': {   # capacidad (mAh) de la batería
+        'dji':   ['battery capacity', 'capacity', 'capacity (mah)', 'battery capacity (mah)'],
+        'autel': ['battery capacity', 'capacity', 'capacity (mah)'],
+        'parrot': ['battery capacity', 'capacity', 'capacity (mah)']
+    },
+    'max_altitude': {       # altura máxima de vuelo / techo de servicio
+        'dji':   ['max takeoff altitude', 'maximum flight altitude', 'service ceiling above sea level', 'max service ceiling', 'maximum altitude'],
+        'autel': ['maximum flight altitude', 'max takeoff altitude', 'maximum service ceiling', 'service ceiling', 'max service ceiling'],
+        'parrot': ['service ceiling', 'maximum flight altitude', 'maximum altitude']
+    },
+    'operating_temperature': {  # rango de temperatura operativa
+        'dji':   ['operating temperature', 'operating temperature range', 'working temperature', 'temperature range'],
+        'autel': ['working temperature', 'operating temperature', 'temperature range', 'working temperature range'],
+        'parrot': ['operating temperature', 'working temperature', 'temperature range']
+    },
+    'ascent_speed': {       # velocidad máxima de ascenso
+        'dji':   ['max ascent speed', 'maximum ascent speed', 'ascent speed'],
+        'autel': ['maximum ascent speed', 'max ascent speed', 'ascent speed'],
+        'parrot': ['maximum ascent speed', 'max ascent speed', 'ascent speed', 'maximum vertical speed']
+    },
+    'descent_speed': {      # velocidad máxima de descenso
+        'dji':   ['max descent speed', 'maximum descent speed', 'descent speed'],
+        'autel': ['maximum descent speed', 'max descent speed', 'descent speed'],
+        'parrot': ['maximum descent speed', 'max descent speed', 'descent speed', 'maximum vertical speed']
+    },
+    'hover_time': {         # tiempo máximo en vuelo estacionario
+        'dji':   ['max hover time', 'maximum hover time', 'hover time', 'hovering time'],
+        'autel': ['maximum hover time', 'hover time', 'hovering time'],
+        'parrot': ['maximum hover time', 'max hover time', 'hover time', 'hovering time']
     }
 }
 
@@ -203,6 +259,48 @@ EXTRACTION_PATTERNS = {
             r'(\d{3,4})p',
             r'(\d{3,4})\s*x\s*(\d{3,4})'
         ]
+    },
+    'battery_capacity': {
+        'patterns': [
+            r'(\d+)\s*(mAh|mah|MAH)',
+            r'(\d+\.?\d*)\s*(Ah|ah|AH)',
+            r'(\d+)\s*(milliampere|milliamp)',
+            r'(\d+)\s*mAh'
+        ]
+    },
+    'altitude': {
+        'patterns': [
+            r'(\d+\.?\d*)\s*(m|meters?|metres?)',
+            r'(\d+\.?\d*)\s*(ft|feet)',
+            r'(\d+\.?\d*)\s*(km|kilometers?)',
+            r'up to\s*(\d+\.?\d*)\s*m'
+        ]
+    },
+    'temperature': {
+        'patterns': [
+            r'(-?\d+\.?\d*)\s*°C\s*to\s*(\d+\.?\d*)\s*°C',
+            r'(-?\d+\.?\d*)\s*°F\s*to\s*(\d+\.?\d*)\s*°F',
+            r'(-?\d+\.?\d*)\s*to\s*(\d+\.?\d*)\s*°C',
+            r'(-?\d+\.?\d*)\s*to\s*(\d+\.?\d*)\s*°F',
+            r'(-?\d+\.?\d*)\s*°C',
+            r'(-?\d+\.?\d*)\s*°F'
+        ]
+    },
+    'vertical_speed': {
+        'patterns': [
+            r'(\d+\.?\d*)\s*(m/s|mps)',
+            r'(\d+\.?\d*)\s*(ft/s|fps)',
+            r'(\d+\.?\d*)\s*(km/h|kmh)',
+            r'(\d+\.?\d*)\s*(mph|mi/h)'
+        ]
+    },
+    'hover_time': {
+        'patterns': [
+            r'(\d+)\s*(minutes?|mins?|min)',
+            r'(\d+)\s*(hours?|hrs?|h)',
+            r'up to\s*(\d+)\s*min',
+            r'(\d+\.?\d*)\s*min'
+        ]
     }
 }
 
@@ -216,7 +314,20 @@ VALIDATION_RULES = {
         'min_flight_time': 10,  # minutos
         'max_flight_time': 60,
         'min_range': 100,  # metros
-        'max_range': 15000
+        'max_range': 15000,
+        # === NUEVAS VALIDACIONES ===
+        'min_battery_capacity': 1000,  # mAh
+        'max_battery_capacity': 15000,
+        'min_max_altitude': 1000,  # metros
+        'max_max_altitude': 10000,
+        'min_operating_temp': -40,  # °C
+        'max_operating_temp': 65,
+        'min_ascent_speed': 1,  # m/s
+        'max_ascent_speed': 10,
+        'min_descent_speed': 1,  # m/s
+        'max_descent_speed': 10,
+        'min_hover_time': 5,  # minutos
+        'max_hover_time': 50
     },
     'autel': {
         'min_price': 500,
@@ -226,7 +337,20 @@ VALIDATION_RULES = {
         'min_flight_time': 15,
         'max_flight_time': 45,
         'min_range': 500,
-        'max_range': 12000
+        'max_range': 12000,
+        # === NUEVAS VALIDACIONES ===
+        'min_battery_capacity': 2000,  # mAh
+        'max_battery_capacity': 20000,
+        'min_max_altitude': 2000,  # metros
+        'max_max_altitude': 8000,
+        'min_operating_temp': -30,  # °C
+        'max_operating_temp': 60,
+        'min_ascent_speed': 1,  # m/s
+        'max_ascent_speed': 8,
+        'min_descent_speed': 1,  # m/s
+        'max_descent_speed': 8,
+        'min_hover_time': 10,  # minutos
+        'max_hover_time': 40
     },
     'parrot': {
         'min_price': 100,
@@ -236,7 +360,20 @@ VALIDATION_RULES = {
         'min_flight_time': 10,
         'max_flight_time': 35,
         'min_range': 100,
-        'max_range': 5000
+        'max_range': 5000,
+        # === NUEVAS VALIDACIONES ===
+        'min_battery_capacity': 500,  # mAh
+        'max_battery_capacity': 8000,
+        'min_max_altitude': 500,  # metros
+        'max_max_altitude': 6000,
+        'min_operating_temp': -20,  # °C
+        'max_operating_temp': 50,
+        'min_ascent_speed': 0.5,  # m/s
+        'max_ascent_speed': 6,
+        'min_descent_speed': 0.5,  # m/s
+        'max_descent_speed': 6,
+        'min_hover_time': 5,  # minutos
+        'max_hover_time': 30
     }
 }
 

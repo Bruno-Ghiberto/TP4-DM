@@ -71,7 +71,7 @@ class DroneScraperOrchestrator:
         results = {}
         
         # Configurar cliente HTTP con reintentos y timeouts
-        timeout = ClientTimeout(total=30, connect=10)
+        timeout = ClientTimeout(total=60, connect=15, sock_read=30)  # PDFs de Parrot son grandes
         connector = TCPConnector(limit=10, limit_per_host=2, enable_cleanup_closed=True)
         
         async with aiohttp.ClientSession(
@@ -389,10 +389,23 @@ class DroneScraperOrchestrator:
             # Esperar carga de contenido dinámico
             wait = WebDriverWait(driver, 15)
             try:
-                wait.until(EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, config['selectors']['product_name'])
-                ))
-            except:
+                # Esperar múltiples condiciones para sitios SPA
+                WebDriverWait(driver, 20).until(
+                    lambda driver: driver.execute_script("return document.readyState") == "complete"
+                )
+                # Esperar que el contenido dinámico se cargue
+                WebDriverWait(driver, 10).until(
+                    EC.any_of(
+                        EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Specifications') or contains(text(), 'specs')]")),
+                        EC.presence_of_element_located((By.CSS_SELECTOR, config['selectors']['product_name']))
+                    )
+                )
+                # Scroll para activar lazy loading
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
+                import time
+                time.sleep(2)
+            except Exception as e:
+                logger.warning(f"Timeout esperando carga completa de {url}: {str(e)}")
                 # Si no encuentra el selector específico, esperar carga general
                 wait.until(lambda driver: driver.execute_script("return document.readyState") == "complete")
             
@@ -615,12 +628,15 @@ class DroneScraperOrchestrator:
             }
         }
         
-        # Extraer nombre del modelo
-        model_elem = soup.select_one('h1.style_title__lBlWu, h1[class*="title"]')
-        if model_elem:
-            drone_data['modelo'] = model_elem.get_text(strip=True).replace('DJI ', '')
-        else:
-            drone_data['modelo'] = self._extract_model_from_url(url)
+                # Extraer nombre del modelo
+        # DJI usa React con clases dinámicas, buscar por estructura
+        model_elem = soup.find('h1') or soup.find('div', {'data-testid': 'product-title'})
+        if not model_elem:
+            # Buscar en meta tags como fallback
+            meta_title = soup.find('meta', {'property': 'og:title'})
+            if meta_title:
+                model_text = meta_title.get('content', '')
+                drone_data['modelo'] = model_text.replace('DJI ', '')
         
         # Buscar JSON-LD estructurado primero
         json_ld_scripts = soup.find_all('script', type='application/ld+json')
@@ -645,7 +661,19 @@ class DroneScraperOrchestrator:
         # Extraer especificaciones técnicas
         specs = {}
         
-        # Método 1: Buscar en listas de especificaciones
+        # Método 1: Buscar por texto específico en toda la página
+        all_text_elements = soup.find_all(string=True)
+        for i, text in enumerate(all_text_elements):
+            if 'Weight' in str(text) or 'Peso' in str(text):
+                # El siguiente elemento suele tener el valor
+                if i + 1 < len(all_text_elements):
+                    weight_text = all_text_elements[i + 1]
+                    match = re.search(r'(\d+\.?\d*)\s*(g|kg)', str(weight_text))
+                    if match:
+                        value, unit = match.groups()
+                        specs['peso_gramos'] = float(value) * (1000 if unit == 'kg' else 1)
+        
+        # Método 2: Buscar en listas de especificaciones tradicionales
         spec_items = soup.select('div[class*="spec-item"], li[class*="spec"]')
         for item in spec_items:
             text = item.get_text(strip=True)
@@ -796,6 +824,37 @@ class DroneScraperOrchestrator:
                 r'max\s*speed[:\s]*(\d+\.?\d*)\s*(km/h|m/s)',
                 r'speed[:\s]*(\d+\.?\d*)\s*(km/h|m/s)',
                 r'up\s*to\s*(\d+\.?\d*)\s*(km/h|m/s)'
+            ],
+            # === NUEVAS ESPECIFICACIONES ===
+            'capacidad_bateria_mah': [
+                r'battery\s*capacity[:\s]*(\d+)\s*(mah|mAh|MAH)',
+                r'capacity[:\s]*(\d+)\s*(mah|mAh|MAH)',
+                r'(\d+)\s*(mah|mAh|MAH)\s*battery'
+            ],
+            'altitud_max_metros': [
+                r'max\s*altitude[:\s]*(\d+\.?\d*)\s*(m|meters?|ft|feet)',
+                r'service\s*ceiling[:\s]*(\d+\.?\d*)\s*(m|meters?|ft|feet)',
+                r'max\s*takeoff\s*altitude[:\s]*(\d+\.?\d*)\s*(m|meters?|ft|feet)'
+            ],
+            'temperatura_operativa': [
+                r'operating\s*temperature[:\s]*(-?\d+\.?\d*)\s*to\s*(\d+\.?\d*)\s*°C',
+                r'working\s*temperature[:\s]*(-?\d+\.?\d*)\s*to\s*(\d+\.?\d*)\s*°C',
+                r'temperature\s*range[:\s]*(-?\d+\.?\d*)\s*to\s*(\d+\.?\d*)\s*°C'
+            ],
+            'velocidad_ascenso_ms': [
+                r'max\s*ascent\s*speed[:\s]*(\d+\.?\d*)\s*(m/s|mps)',
+                r'ascent\s*speed[:\s]*(\d+\.?\d*)\s*(m/s|mps)',
+                r'vertical\s*speed\s*up[:\s]*(\d+\.?\d*)\s*(m/s|mps)'
+            ],
+            'velocidad_descenso_ms': [
+                r'max\s*descent\s*speed[:\s]*(\d+\.?\d*)\s*(m/s|mps)',
+                r'descent\s*speed[:\s]*(\d+\.?\d*)\s*(m/s|mps)',
+                r'vertical\s*speed\s*down[:\s]*(\d+\.?\d*)\s*(m/s|mps)'
+            ],
+            'tiempo_hover_minutos': [
+                r'hover\s*time[:\s]*(\d+)\s*(min|minutes?|hrs?|hours?)',
+                r'max\s*hover\s*time[:\s]*(\d+)\s*(min|minutes?|hrs?|hours?)',
+                r'hovering\s*time[:\s]*(\d+)\s*(min|minutes?|hrs?|hours?)'
             ]
         }
         
@@ -803,20 +862,23 @@ class DroneScraperOrchestrator:
             for pattern in pattern_list:
                 match = re.search(pattern, text, re.IGNORECASE)
                 if match:
-                    value, unit = match.groups()
+                    groups = match.groups()
                     
                     # Convertir unidades si es necesario
                     if spec_name == 'peso_gramos':
+                        value, unit = groups
                         if unit.lower() in ['kg']:
                             specs[spec_name] = float(value) * 1000
                         else:
                             specs[spec_name] = float(value)
                     elif spec_name == 'autonomia_minutos':
+                        value, unit = groups
                         if unit.lower() in ['hrs', 'hours', 'hour']:
                             specs[spec_name] = float(value) * 60
                         else:
                             specs[spec_name] = float(value)
                     elif spec_name == 'alcance_metros':
+                        value, unit = groups
                         if unit.lower() in ['km', 'kilometers']:
                             specs[spec_name] = float(value) * 1000
                         elif unit.lower() in ['ft', 'feet']:
@@ -824,10 +886,33 @@ class DroneScraperOrchestrator:
                         else:
                             specs[spec_name] = float(value)
                     elif spec_name == 'velocidad_max_kmh':
+                        value, unit = groups
                         if unit.lower() in ['mph']:
                             specs[spec_name] = float(value) * 1.60934
                         elif unit.lower() in ['m/s']:
                             specs[spec_name] = float(value) * 3.6
+                        else:
+                            specs[spec_name] = float(value)
+                    # === NUEVAS CONVERSIONES ===
+                    elif spec_name == 'capacidad_bateria_mah':
+                        value, unit = groups
+                        specs[spec_name] = float(value)
+                    elif spec_name == 'altitud_max_metros':
+                        value, unit = groups
+                        if unit.lower() in ['ft', 'feet']:
+                            specs[spec_name] = float(value) * 0.3048
+                        else:
+                            specs[spec_name] = float(value)
+                    elif spec_name == 'temperatura_operativa':
+                        min_temp, max_temp = groups
+                        specs[spec_name] = f"{float(min_temp)}°C to {float(max_temp)}°C"
+                    elif spec_name in ['velocidad_ascenso_ms', 'velocidad_descenso_ms']:
+                        value, unit = groups
+                        specs[spec_name] = float(value)
+                    elif spec_name == 'tiempo_hover_minutos':
+                        value, unit = groups
+                        if unit.lower() in ['hrs', 'hours', 'hour']:
+                            specs[spec_name] = float(value) * 60
                         else:
                             specs[spec_name] = float(value)
                     
@@ -1063,34 +1148,78 @@ class DroneScraperOrchestrator:
             }
         }
         
-        # Extraer nombre del modelo
-        model_elem = soup.select_one('h1.product-title, .product-name h1')
+        # Extraer nombre del modelo con múltiples selectores
+        model_elem = soup.select_one('h1.product-title, .product-name h1, h1[class*="title"], .elementor-heading-title')
         if model_elem:
-            drone_data['modelo'] = model_elem.get_text(strip=True).replace('Autel ', '')
+            model_text = model_elem.get_text(strip=True)
+            # Limpiar prefijos de marca
+            for prefix in ['Autel ', 'AUTEL ']:
+                model_text = model_text.replace(prefix, '')
+            drone_data['modelo'] = model_text
         else:
+            # Extraer del URL como último recurso
             drone_data['modelo'] = self._extract_model_from_url(url)
         
-        # Buscar tabla de especificaciones
-        specs_table = soup.select_one('table.specs-table, .product-parameters table')
+        # Autel usa acordeones para especificaciones
+        accordion_items = soup.find_all('div', class_='elementor-accordion-item')
         specs = {}
-        
-        if specs_table:
-            rows = specs_table.select('tr')
-            for row in rows:
-                cells = row.select('td, th')
-                if len(cells) >= 2:
-                    label = cells[0].get_text(strip=True).lower()
-                    value = cells[1].get_text(strip=True)
-                    
-                    # Mapear especificaciones
-                    if 'weight' in label:
-                        specs['peso_gramos'] = self.data_cleaner.extract_number(value, 'grams')
-                    elif 'flight time' in label:
-                        specs['autonomia_minutos'] = self.data_cleaner.extract_number(value, 'minutes')
-                    elif 'range' in label or 'distance' in label:
-                        specs['alcance_metros'] = self.data_cleaner.extract_number(value, 'meters')
-                    elif 'speed' in label:
-                        specs['velocidad_max_kmh'] = self.data_cleaner.extract_number(value, 'kmh')
+
+        for item in accordion_items:
+            title = item.find('div', class_='elementor-tab-title')
+            content = item.find('div', class_='elementor-tab-content')
+            
+            if title and content:
+                title_text = title.get_text(strip=True).lower()
+                if 'specification' in title_text or 'parameter' in title_text:
+                    # Extraer tabla dentro del acordeón
+                    table = content.find('table')
+                    if table:
+                        rows = table.find_all('tr')
+                        for row in rows:
+                            cells = row.find_all(['td', 'th'])
+                            if len(cells) >= 2:
+                                key = cells[0].get_text(strip=True).lower()
+                                value = cells[1].get_text(strip=True)
+                                # Procesar según tipo de spec
+                                if 'weight' in key:
+                                    specs['peso_gramos'] = self.data_cleaner.extract_number(value, 'grams')
+                                elif 'flight time' in key:
+                                    specs['autonomia_minutos'] = self.data_cleaner.extract_number(value, 'minutes')
+                                elif 'range' in key or 'distance' in key:
+                                    specs['alcance_metros'] = self.data_cleaner.extract_number(value, 'meters')
+
+        # Si no hay especificaciones en acordeones, buscar en toda la página
+        if not specs:
+            page_text = soup.get_text()
+            specs = self._extract_specs_with_regex(page_text)
+            
+        # Si aún no hay especificaciones, buscar en elementos específicos
+        if not specs:
+            spec_items = soup.select('.spec-item, .parameter-item, .product-parameter')
+            for item in spec_items:
+                text = item.get_text(strip=True)
+                # Buscar patrones específicos
+                weight_match = re.search(r'(\d+\.?\d*)\s*(g|kg)', text)
+                if weight_match and not specs.get('peso_gramos'):
+                    value, unit = weight_match.groups()
+                    specs['peso_gramos'] = float(value) * (1000 if unit == 'kg' else 1)
+
+        # Buscar JSON-LD que Autel incluye
+        json_ld_scripts = soup.find_all('script', type='application/ld+json')
+        for script in json_ld_scripts:
+            try:
+                data = json.loads(script.string)
+                if '@graph' in data:
+                    for item in data['@graph']:
+                        if item.get('@type') == 'Product':
+                            # Extraer precio si está disponible
+                            if 'offers' in item:
+                                drone_data['precio'] = {
+                                    'usd': float(item['offers'].get('price', 0)),
+                                    'moneda_local': item['offers'].get('priceCurrency', 'USD')
+                                }
+            except:
+                pass
         
         # Si no hay tabla, buscar en acordeones o listas
         if not specs:
@@ -1102,7 +1231,14 @@ class DroneScraperOrchestrator:
         
         drone_data['especificaciones_tecnicas'] = self.data_cleaner.standardize_specifications(specs)
         
-        # Resto del código similar a DJI...
+        # Extraer especificaciones de cámara
+        drone_data['camara'] = self._extract_camera_specs(soup, {})
+        
+        # Extraer características de vuelo
+        drone_data['caracteristicas_vuelo'] = self._extract_flight_features(soup, {})
+        
+        # Aplicar clasificación
+        drone_data['clasificacion'] = self._classify_drone(drone_data)
         
         return drone_data
 
@@ -1218,6 +1354,10 @@ class DroneScraperOrchestrator:
         specs = drone_data.get('especificaciones_tecnicas', {})
         peso = specs.get('peso_gramos', 0)
         
+        # Validar que peso no sea None
+        if peso is None:
+            peso = 0
+        
         # Clasificación por peso
         if peso <= 250:
             classification['categoria_peso'] = 'ultraligero'
@@ -1305,6 +1445,10 @@ class DroneScraperOrchestrator:
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
             'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
             'Cache-Control': 'max-age=0'
         }
     
@@ -1432,6 +1576,14 @@ class DroneScraperOrchestrator:
         autonomia = specs.get('autonomia_minutos', 0)
         alcance = specs.get('alcance_metros', 0)
         
+        # Validar que los valores no sean None
+        if peso is None:
+            peso = 0
+        if autonomia is None:
+            autonomia = 0
+        if alcance is None:
+            alcance = 0
+        
         # Clasificación por peso
         if peso <= 250:
             classification['categoria_peso'] = 'ultraligero'
@@ -1507,6 +1659,23 @@ class DroneScraperOrchestrator:
         return drone_data
     
 
+async def test_single_url():
+    """Test rápido de un solo URL"""
+    scraper = DroneScraperOrchestrator()
+    url = "https://www.dji.com/mini-3"
+    async with aiohttp.ClientSession() as session:
+        scraper.session = session
+        html = await scraper._fetch_page_robust(url)
+        if html:
+            print(f"✓ Descargado: {len(html)} caracteres")
+            soup = BeautifulSoup(html, 'lxml')
+            title = soup.find('title')
+            print(f"✓ Título: {title.text if title else 'No encontrado'}")
+        else:
+            print("✗ Error descargando página")
+
+# Ejecutar con: asyncio.run(test_single_url())
+
 async def main():
     """Función principal con validación y reporte completo"""
     scraper = DroneScraperOrchestrator()
@@ -1515,8 +1684,20 @@ async def main():
         logger.info("Iniciando scraping de drones...")
         start_time = datetime.now()
         
-        # Realizar scraping
-        results = await scraper.scrape_all_brands()
+        # Realizar scraping con manejo de errores y reintentos
+        max_retries = 3
+        results = {}
+        for attempt in range(max_retries):
+            try:
+                results = await scraper.scrape_all_brands()
+                break
+            except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                logger.warning(f"Intento {attempt + 1} falló: {str(e)}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(5 * (attempt + 1))  # Backoff exponencial
+                else:
+                    logger.error("Máximo de reintentos alcanzado")
+                    results = {}
         
         logger.info(f"Scraping completado. Total de productos: {scraper.extraction_stats['total_products']}")
         

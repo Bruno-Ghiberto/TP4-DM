@@ -66,7 +66,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDroneData() {
     try {
-        const response = await fetch('../analysis/solution_data.json');
+        // Usar ruta relativa correcta o absoluta
+        let response;
+        try {
+            response = await fetch('./analysis/solution_data.json');
+        } catch {
+            try {
+                response = await fetch('/analysis/solution_data.json');
+            } catch {
+                response = await fetch('analysis/solution_data.json');
+            }
+        }
+        
         if (!response.ok) {
             throw new Error('Error cargando datos');
         }

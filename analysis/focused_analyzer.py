@@ -33,7 +33,17 @@ class FocusedDroneAnalyzer:
             with open(data_path, 'r', encoding='utf-8') as f:
                 drones_data = json.load(f)
             
+            if not drones_data:
+                logger.error("No hay datos de drones para analizar")
+                self.drones_df = pd.DataFrame()
+                return
+                
             self.drones_df = pd.json_normalize(drones_data)
+            
+            if self.drones_df.empty:
+                logger.warning("DataFrame de drones está vacío")
+                return
+                
             self.analysis_results['total_analyzed'] = len(self.drones_df)
             
             # Normalizar nombres de columnas

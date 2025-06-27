@@ -5,6 +5,7 @@ Asegura que los datos cumplan con el esquema JSON definido
 
 import json
 import logging
+import re
 from typing import Dict, List, Tuple, Any, Optional
 from datetime import datetime
 
@@ -41,7 +42,7 @@ class DataValidator:
                 },
                 "marca": {
                     "type": "string",
-                    "enum": ["DJI", "Autel", "Parrot"]
+                    "enum": ["DJI", "Autel", "Parrot", "dji", "autel", "parrot"]
                 },
                 "url_fuente": {
                     "type": "string",
@@ -68,6 +69,7 @@ class DataValidator:
                     "type": "object",
                     "required": ["peso_gramos", "autonomia_minutos", "alcance_metros"],
                     "properties": {
+                        # === ESPECIFICACIONES BÁSICAS ===
                         "peso_gramos": {
                             "type": ["number", "null"],
                             "minimum": 0,
@@ -95,6 +97,36 @@ class DataValidator:
                         "temperatura_operacion": {
                             "type": ["string", "null"],
                             "maxLength": 50
+                        },
+                        # === NUEVAS ESPECIFICACIONES ===
+                        "capacidad_bateria_mah": {
+                            "type": ["number", "null"],
+                            "minimum": 100,
+                            "maximum": 25000
+                        },
+                        "altitud_max_metros": {
+                            "type": ["number", "null"],
+                            "minimum": 0,
+                            "maximum": 12000
+                        },
+                        "temperatura_operativa": {
+                            "type": ["string", "null"],
+                            "maxLength": 100
+                        },
+                        "velocidad_ascenso_ms": {
+                            "type": ["number", "null"],
+                            "minimum": 0,
+                            "maximum": 15
+                        },
+                        "velocidad_descenso_ms": {
+                            "type": ["number", "null"],
+                            "minimum": 0,
+                            "maximum": 15
+                        },
+                        "tiempo_hover_minutos": {
+                            "type": ["number", "null"],
+                            "minimum": 0,
+                            "maximum": 100
                         }
                     }
                 },
@@ -285,6 +317,67 @@ class DataValidator:
             # Drones ultra ligeros no deberían tener autonomía extrema
             if peso < 250 and autonomia > 30:
                 errors.append(f"Autonomía poco probable ({autonomia}min) para drone ultra ligero {peso}g")
+        
+        # === NUEVAS VALIDACIONES ===
+        # Validar relación capacidad batería/autonomía
+        if specs.get('capacidad_bateria_mah') and specs.get('autonomia_minutos'):
+            bateria = specs['capacidad_bateria_mah']
+            autonomia = specs['autonomia_minutos']
+            
+            # Ratio aproximado: 100-200 mAh por minuto de vuelo
+            if bateria / autonomia < 50:
+                errors.append(f"Capacidad de batería muy baja ({bateria}mAh) para autonomía {autonomia}min")
+            elif bateria / autonomia > 400:
+                errors.append(f"Capacidad de batería sospechosamente alta ({bateria}mAh) para autonomía {autonomia}min")
+        
+        # Validar velocidades verticales coherentes
+        if specs.get('velocidad_ascenso_ms') and specs.get('velocidad_descenso_ms'):
+            ascenso = specs['velocidad_ascenso_ms']
+            descenso = specs['velocidad_descenso_ms']
+            
+            # Velocidad de descenso generalmente mayor que ascenso
+            if ascenso > descenso * 1.5:
+                errors.append(f"Velocidad de ascenso ({ascenso}m/s) inusualmente mayor que descenso ({descenso}m/s)")
+        
+        # Validar tiempo hover vs autonomía
+        if specs.get('tiempo_hover_minutos') and specs.get('autonomia_minutos'):
+            hover = specs['tiempo_hover_minutos']
+            autonomia = specs['autonomia_minutos']
+            
+            # Tiempo de hover debería ser menor o igual a autonomía
+            if hover > autonomia:
+                errors.append(f"Tiempo hover ({hover}min) no puede ser mayor que autonomía ({autonomia}min)")
+        
+        # Validar altitud máxima vs categoría
+        if specs.get('altitud_max_metros'):
+            altitud = specs['altitud_max_metros']
+            
+            # Límites realistas para drones comerciales
+            if altitud > 10000:
+                errors.append(f"Altitud máxima ({altitud}m) excede límites típicos para drones comerciales")
+            elif altitud < 100:
+                errors.append(f"Altitud máxima muy baja ({altitud}m) para un drone")
+        
+        # Validar temperatura operativa
+        if specs.get('temperatura_operativa'):
+            temp_str = str(specs['temperatura_operativa'])
+            if '°C' in temp_str and 'to' in temp_str:
+                try:
+                    # Extraer rango de temperatura
+                    temps = re.findall(r'-?\d+', temp_str)
+                    if len(temps) >= 2:
+                        min_temp = int(temps[0])
+                        max_temp = int(temps[1])
+                        
+                        # Validar rango razonable
+                        if min_temp < -50:
+                            errors.append(f"Temperatura mínima operativa muy baja ({min_temp}°C)")
+                        if max_temp > 70:
+                            errors.append(f"Temperatura máxima operativa muy alta ({max_temp}°C)")
+                        if max_temp - min_temp < 20:
+                            errors.append(f"Rango de temperatura operativa muy estrecho ({temp_str})")
+                except:
+                    pass
         
         # Validar clasificación vs especificaciones
         clasificacion = drone_data.get('clasificacion', {})
