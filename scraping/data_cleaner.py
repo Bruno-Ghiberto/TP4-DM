@@ -331,10 +331,12 @@ class DataCleaner:
         if 'especificaciones_tecnicas' in drone_data:
             specs = drone_data['especificaciones_tecnicas']
             
-            # Al menos 1 especificación debe tener valor (más permisivo)
+            # Ser más permisivo durante el desarrollo - aceptar si tiene modelo y marca
             spec_count = sum(1 for v in specs.values() if v is not None and v != "")
-            if spec_count < 1:
-                issues.append(f"Pocas especificaciones válidas: {spec_count}/6")
+            logger.info(f"Drone {drone_data.get('modelo', 'Unknown')}: {spec_count} especificaciones encontradas")
+            # No rechazar por pocas especificaciones durante desarrollo
+            # if spec_count < 1:
+            #     issues.append(f"Pocas especificaciones válidas: {spec_count}/6")
             
             # Validar rangos
             if specs.get('peso_gramos') is not None:

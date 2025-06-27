@@ -3,11 +3,11 @@
     "marca": "DJI",
     "url_fuente": "https://www.dji.com/mavic-3-pro/specs",
     "metadata": {
-      "fecha_extraccion": "2025-06-27T11:30:17.455321",
+      "fecha_extraccion": "2025-06-27T12:02:06.418001",
       "version_scraper": "1.0.0",
       "confiabilidad_datos": "alta"
     },
-    "modelo": "Mavic 3 Pro - Specs - DJI",
+    "modelo": "Specs",
     "especificaciones_tecnicas": {
       "peso_gramos": null,
       "autonomia_minutos": null,
@@ -15,12 +15,12 @@
       "velocidad_max_kmh": null,
       "resistencia_viento": null,
       "temperatura_operacion": null,
-      "capacidad_bateria_mah": null,
-      "altitud_max_metros": null,
+      "capacidad_bateria_mah": 5000.0,
+      "altitud_max_metros": 6000.0,
       "temperatura_operativa": null,
-      "velocidad_ascenso_ms": null,
-      "velocidad_descenso_ms": null,
-      "tiempo_hover_minutos": null
+      "velocidad_ascenso_ms": 8.0,
+      "velocidad_descenso_ms": 6.0,
+      "tiempo_hover_minutos": 37.0
     },
     "camara": {
       "resolucion_video": null,

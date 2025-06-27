@@ -1,5 +1,5 @@
 {
-  "start_time": "2025-06-27T11:30:07.098378",
+  "start_time": "2025-06-27T12:01:57.125524",
   "brands_scraped": {
     "dji": 1,
     "autel": 1,
@@ -7,18 +7,21 @@
   },
   "total_products": 4,
   "errors": [],
-  "end_time": "2025-06-27T11:31:45.063170",
-  "duration_seconds": 97.964792
-}2025-06-27 11:31:45,065 - __main__ - INFO - Estadísticas guardadas en c:\Users\bghiberto\Documents\Bruno Ghiberto\IES\Minería de datos\Tp4\data\extraction_log.json
-2025-06-27 11:31:45,067 - __main__ - INFO - Reporte de extracción generado: c:\Users\bghiberto\Documents\Bruno Ghiberto\IES\Minería de datos\Tp4\data\extraction_report.json
-2025-06-27 11:31:45,068 - __main__ - INFO - Resumen: 4 drones en 1.63 minutos
-2025-06-27 11:31:45,070 - __main__ - INFO - Scraping completado. Total de productos: 4
-2025-06-27 11:31:45,071 - __main__ - INFO - Normalizando datos...
-2025-06-27 11:31:45,071 - data_cleaner - WARNING - Drone Mavic 3 Pro - Specs - DJI rechazado por falta de información básica: ['Pocas especificaciones válidas: 0/6']
-2025-06-27 11:31:45,072 - data_cleaner - WARNING - Drone ANAFI Ai rechazado por falta de información básica: ['Pocas especificaciones válidas: 0/6']
-2025-06-27 11:31:45,072 - data_cleaner - WARNING - Drone ANAFI USA tiene problemas menores: ['Pocas especificaciones válidas: 0/6']
-2025-06-27 11:31:45,072 - data_cleaner - INFO - Normalizados 2 de 4 drones
-2025-06-27 11:31:45,084 - __main__ - INFO - Proceso completado en 1.63 minutos
-2025-06-27 11:31:45,085 - __main__ - INFO - Datos procesados guardados: 0 drones válidos de 4 extraídos
-2025-06-27 11:31:45,085 - __main__ - INFO - Tasa de éxito: 0.0%
-2025-06-27 11:31:45,085 - __main__ - WARNING - Se encontraron 2 errores de validación
+  "end_time": "2025-06-27T12:03:46.661075",
+  "duration_seconds": 109.535551
+}2025-06-27 12:03:46,661 - __main__ - INFO - Estadísticas guardadas en c:\Users\bghiberto\Documents\Bruno Ghiberto\IES\Minería de datos\Tp4\data\extraction_log.json
+2025-06-27 12:03:46,662 - __main__ - INFO - Reporte de extracción generado: c:\Users\bghiberto\Documents\Bruno Ghiberto\IES\Minería de datos\Tp4\data\extraction_report.json
+2025-06-27 12:03:46,663 - __main__ - INFO - Resumen: 4 drones en 1.83 minutos
+2025-06-27 12:03:46,666 - __main__ - INFO - Scraping completado. Total de productos: 4
+2025-06-27 12:03:46,667 - __main__ - INFO - Normalizando datos...
+2025-06-27 12:03:46,667 - data_cleaner - INFO - Drone Specs: 5 especificaciones encontradas
+2025-06-27 12:03:46,668 - data_cleaner - WARNING - Drone Specs rechazado por falta de información básica: []
+2025-06-27 12:03:46,668 - data_cleaner - INFO - Drone Unknown Model: 1 especificaciones encontradas
+2025-06-27 12:03:46,669 - data_cleaner - INFO - Drone ANAFI Ai: 0 especificaciones encontradas
+2025-06-27 12:03:46,669 - data_cleaner - WARNING - Drone ANAFI Ai rechazado por falta de información básica: []
+2025-06-27 12:03:46,669 - data_cleaner - INFO - Drone ANAFI USA: 0 especificaciones encontradas
+2025-06-27 12:03:46,670 - data_cleaner - INFO - Normalizados 2 de 4 drones
+2025-06-27 12:03:46,683 - __main__ - INFO - Proceso completado en 1.83 minutos
+2025-06-27 12:03:46,684 - __main__ - INFO - Datos procesados guardados: 0 drones válidos de 4 extraídos
+2025-06-27 12:03:46,684 - __main__ - INFO - Tasa de éxito: 0.0%
+2025-06-27 12:03:46,684 - __main__ - WARNING - Se encontraron 2 errores de validación

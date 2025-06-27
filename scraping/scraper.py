@@ -263,8 +263,16 @@ class DroneScraperOrchestrator:
                             continue
                     
                     if not element_found:
-                        # Esperar tiempo fijo como fallback
-                        await asyncio.sleep(5)
+                        # Esperar más tiempo y hacer scroll para activar lazy loading
+                        await asyncio.sleep(3)
+                        # Scroll gradual para cargar contenido
+                        for i in range(3):
+                            self.driver.execute_script(f"window.scrollTo(0, document.body.scrollHeight * {i/3});")
+                            await asyncio.sleep(1)
+
+                        # Buscar elementos de especificaciones después del scroll
+                        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                        await asyncio.sleep(2)
                     
                     # Scroll para cargar todo el contenido
                     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -352,6 +360,9 @@ class DroneScraperOrchestrator:
                 return None
             
             soup = BeautifulSoup(html, 'lxml')
+            
+            # Debug para desarrollo
+            self._debug_page_content(soup, brand, url)
             
             # Extraer especificaciones
             drone_data = self.extract_drone_specs(soup, brand, url)
@@ -628,102 +639,36 @@ class DroneScraperOrchestrator:
             }
         }
         
-                # Extraer nombre del modelo
-        # DJI usa React con clases dinámicas, buscar por estructura
-        model_elem = soup.find('h1') or soup.find('div', {'data-testid': 'product-title'})
-        if not model_elem:
-            # Buscar en meta tags como fallback
-            meta_title = soup.find('meta', {'property': 'og:title'})
-            if meta_title:
-                model_text = meta_title.get('content', '')
-                drone_data['modelo'] = model_text.replace('DJI ', '')
+        # Extraer nombre del modelo desde la URL si no se encuentra en la página
+        model_elem = soup.find('h1') or soup.find('title')
+        if model_elem:
+            model_text = model_elem.get_text(strip=True)
+            drone_data['modelo'] = model_text.replace('- Specs - DJI', '').replace('DJI ', '').strip()
+        else:
+            drone_data['modelo'] = self._extract_model_from_url(url)
         
-        # Buscar JSON-LD estructurado primero
-        json_ld_scripts = soup.find_all('script', type='application/ld+json')
-        for script in json_ld_scripts:
-            try:
-                data = json.loads(script.string)
-                if isinstance(data, dict) and data.get('@type') == 'Product':
-                    # Extraer datos del JSON-LD
-                    if 'name' in data:
-                        drone_data['modelo'] = data['name'].replace('DJI ', '')
-                    if 'offers' in data and 'price' in data['offers']:
-                        drone_data['precio'] = {
-                            'usd': float(data['offers']['price']),
-                            'moneda_local': data['offers'].get('priceCurrency', 'USD')
-                        }
-            except:
-                pass
+        logger.info(f"Procesando modelo: {drone_data['modelo']}")
         
-        # Buscar sección de especificaciones
-        specs_section = soup.select_one('div[class*="specs"], section[class*="specification"]')
-        
-        # Extraer especificaciones técnicas
-        specs = {}
-        
-        # Método 1: Buscar por texto específico en toda la página
-        all_text_elements = soup.find_all(string=True)
-        for i, text in enumerate(all_text_elements):
-            if 'Weight' in str(text) or 'Peso' in str(text):
-                # El siguiente elemento suele tener el valor
-                if i + 1 < len(all_text_elements):
-                    weight_text = all_text_elements[i + 1]
-                    match = re.search(r'(\d+\.?\d*)\s*(g|kg)', str(weight_text))
-                    if match:
-                        value, unit = match.groups()
-                        specs['peso_gramos'] = float(value) * (1000 if unit == 'kg' else 1)
-        
-        # Método 2: Buscar en listas de especificaciones tradicionales
-        spec_items = soup.select('div[class*="spec-item"], li[class*="spec"]')
-        for item in spec_items:
-            text = item.get_text(strip=True)
-            
-            # Peso
-            if any(word in text.lower() for word in ['weight', 'peso']):
-                match = re.search(r'(\d+\.?\d*)\s*(g|kg)', text)
-                if match:
-                    value, unit = match.groups()
-                    specs['peso_gramos'] = float(value) * (1000 if unit == 'kg' else 1)
-            
-            # Tiempo de vuelo
-            elif any(word in text.lower() for word in ['flight time', 'autonomía']):
-                match = re.search(r'(\d+)\s*min', text)
-                if match:
-                    specs['autonomia_minutos'] = int(match.group(1))
-            
-            # Alcance
-            elif any(word in text.lower() for word in ['transmission', 'range', 'alcance']):
-                match = re.search(r'(\d+\.?\d*)\s*(km|m)', text)
-                if match:
-                    value, unit = match.groups()
-                    specs['alcance_metros'] = float(value) * (1000 if unit == 'km' else 1)
-        
-        # Método 2: Buscar en el texto con patrones más específicos
+        # Extraer especificaciones del texto completo de la página
         page_text = soup.get_text()
         
-        # Peso - patrones específicos de DJI
-        if 'peso_gramos' not in specs:
-            patterns = [
-                r'Takeoff Weight[:\s]*<?(\d+\.?\d*)\s*(g|kg)',
-                r'Aircraft Weight[:\s]*(\d+\.?\d*)\s*(g|kg)',
-                r'Weight \(.*?\)[:\s]*(\d+\.?\d*)\s*(g|kg)'
-            ]
-            for pattern in patterns:
-                match = re.search(pattern, page_text, re.IGNORECASE)
-                if match:
-                    value, unit = match.groups()
-                    specs['peso_gramos'] = float(value) * (1000 if unit.lower() == 'kg' else 1)
-                    break
+        # Método mejorado: buscar patrones en todo el texto
+        specs = self._extract_specs_with_regex(page_text)
+        
+        # Buscar en elementos con data-* attributes (común en React)
+        for elem in soup.find_all(attrs={"data-test": True}):
+            text = elem.get_text(strip=True)
+            if text:
+                # Aplicar extracción adicional
+                additional_specs = self._extract_specs_with_regex(text)
+                specs.update(additional_specs)
+        
+        # Log para debugging
+        logger.info(f"Especificaciones extraídas para {drone_data['modelo']}: {specs}")
         
         drone_data['especificaciones_tecnicas'] = self.data_cleaner.standardize_specifications(specs)
-        
-        # Extraer características de cámara
         drone_data['camara'] = self._extract_camera_specs_dji(soup, page_text)
-        
-        # Extraer características de vuelo
         drone_data['caracteristicas_vuelo'] = self._extract_flight_features_dji(soup, page_text)
-        
-        # Clasificación
         drone_data['clasificacion'] = self._classify_drone(drone_data)
         
         return drone_data
@@ -1889,6 +1834,35 @@ def analyze_data_quality(drones: List[Dict]) -> Dict:
             }
     
     return quality_stats
+
+    def _debug_page_content(self, soup: BeautifulSoup, brand: str, url: str):
+        """Debug helper para ver qué contenido se está extrayendo"""
+        logger.info(f"\n{'='*50}")
+        logger.info(f"DEBUG {brand} - {url}")
+        logger.info(f"{'='*50}")
+        
+        # Buscar cualquier texto que contenga números seguidos de unidades comunes
+        import re
+        page_text = soup.get_text()
+        
+        # Buscar patrones de especificaciones
+        patterns = [
+            r'\d+\.?\d*\s*(g|kg|grams?)',  # Peso
+            r'\d+\s*(min|minutes?)',         # Tiempo de vuelo
+            r'\d+\.?\d*\s*(km|m|meters?)',   # Alcance
+            r'\d+\.?\d*\s*(km/h|mph)',       # Velocidad
+        ]
+        
+        for pattern in patterns:
+            matches = re.findall(pattern, page_text, re.IGNORECASE)
+            if matches:
+                logger.info(f"Encontrado patrón '{pattern}': {matches[:5]}")  # Primeros 5
+        
+        # Guardar HTML para inspección manual
+        debug_file = Path(f"debug_{brand}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html")
+        with open(debug_file, 'w', encoding='utf-8') as f:
+            f.write(str(soup.prettify()))
+        logger.info(f"HTML guardado en: {debug_file}")
 
 
 if __name__ == "__main__":
