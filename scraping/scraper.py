@@ -1286,36 +1286,6 @@ class DroneScraperOrchestrator:
         
         return features
 
-    def _classify_drone(self, drone_data: Dict) -> Dict:
-        """Clasificación automática del drone"""
-        classification = {
-            'categoria_peso': 'medio',
-            'nivel_usuario': 'intermedio',
-            'uso_principal': ['recreativo'],
-            'certificaciones': []
-        }
-        
-        # Obtener especificaciones
-        specs = drone_data.get('especificaciones_tecnicas', {})
-        peso = specs.get('peso_gramos', 0)
-        
-        # Validar que peso no sea None
-        if peso is None:
-            peso = 0
-        
-        # Clasificación por peso
-        if peso <= 250:
-            classification['categoria_peso'] = 'ultraligero'
-            classification['nivel_usuario'] = 'principiante'
-        elif peso <= 900:
-            classification['categoria_peso'] = 'ligero'
-        elif peso <= 2000:
-            classification['categoria_peso'] = 'medio'
-        else:
-            classification['categoria_peso'] = 'pesado'
-            classification['nivel_usuario'] = 'profesional'
-        
-        return classification
 
     def save_raw_data(self, brand: str, data: List[Dict]) -> None:
         """Guardar datos crudos por marca"""
@@ -1600,9 +1570,35 @@ class DroneScraperOrchestrator:
         drone_data['camara'] = self._extract_camera_specs(soup, {})
         drone_data['caracteristicas_vuelo'] = self._extract_flight_features(soup, {})
         drone_data['clasificacion'] = self._classify_drone(drone_data)
-        
+
         return drone_data
-    
+
+    def _debug_page_content(self, soup: BeautifulSoup, brand: str, url: str):
+        """Debug helper para ver el contenido analizado"""
+        logger.info(f"\n{'='*50}")
+        logger.info(f"DEBUG {brand} - {url}")
+        logger.info(f"{'='*50}")
+
+        page_text = soup.get_text()
+        patterns = [
+            r'\d+\.?\d*\s*(g|kg|grams?)',
+            r'\d+\s*(min|minutes?)',
+            r'\d+\.?\d*\s*(km|m|meters?)',
+            r'\d+\.?\d*\s*(km/h|mph)'
+        ]
+
+        for pattern in patterns:
+            matches = re.findall(pattern, page_text, re.IGNORECASE)
+            if matches:
+                logger.info(f"Encontrado patrón '{pattern}': {matches[:5]}")
+
+        debug_file = Path(
+            f"debug_{brand}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+        )
+        with open(debug_file, 'w', encoding='utf-8') as f:
+            f.write(str(soup.prettify()))
+        logger.info(f"HTML guardado en: {debug_file}")
+
 
 async def test_single_url():
     """Test rápido de un solo URL"""
@@ -1834,36 +1830,6 @@ def analyze_data_quality(drones: List[Dict]) -> Dict:
             }
     
     return quality_stats
-
-    def _debug_page_content(self, soup: BeautifulSoup, brand: str, url: str):
-        """Debug helper para ver qué contenido se está extrayendo"""
-        logger.info(f"\n{'='*50}")
-        logger.info(f"DEBUG {brand} - {url}")
-        logger.info(f"{'='*50}")
-        
-        # Buscar cualquier texto que contenga números seguidos de unidades comunes
-        import re
-        page_text = soup.get_text()
-        
-        # Buscar patrones de especificaciones
-        patterns = [
-            r'\d+\.?\d*\s*(g|kg|grams?)',  # Peso
-            r'\d+\s*(min|minutes?)',         # Tiempo de vuelo
-            r'\d+\.?\d*\s*(km|m|meters?)',   # Alcance
-            r'\d+\.?\d*\s*(km/h|mph)',       # Velocidad
-        ]
-        
-        for pattern in patterns:
-            matches = re.findall(pattern, page_text, re.IGNORECASE)
-            if matches:
-                logger.info(f"Encontrado patrón '{pattern}': {matches[:5]}")  # Primeros 5
-        
-        # Guardar HTML para inspección manual
-        debug_file = Path(f"debug_{brand}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html")
-        with open(debug_file, 'w', encoding='utf-8') as f:
-            f.write(str(soup.prettify()))
-        logger.info(f"HTML guardado en: {debug_file}")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
