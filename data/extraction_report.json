@@ -1,9 +1,9 @@
 {
   "resumen_extraccion": {
-    "fecha_inicio": "2025-06-27T12:37:54.461716",
-    "fecha_fin": "2025-06-27T12:48:46.088543",
-    "duracion_segundos": 651.626827,
-    "duracion_minutos": 10.86,
+    "fecha_inicio": "2025-06-27T15:02:31.715761",
+    "fecha_fin": "2025-06-27T15:13:22.359100",
+    "duracion_segundos": 650.643339,
+    "duracion_minutos": 10.84,
     "total_drones_extraidos": 20,
     "total_errores": 0,
     "marcas_procesadas": 3
