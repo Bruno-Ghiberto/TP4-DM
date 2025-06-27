@@ -340,15 +340,15 @@ class DataCleaner:
             
             # Validar rangos
             if specs.get('peso_gramos') is not None:
-                if specs['peso_gramos'] < 50 or specs['peso_gramos'] > 50000:
+                if specs['peso_gramos'] < 20 or specs['peso_gramos'] > 100000:
                     issues.append(f"Peso fuera de rango: {specs['peso_gramos']}g")
             
             if specs.get('autonomia_minutos') is not None:
-                if specs['autonomia_minutos'] < 5 or specs['autonomia_minutos'] > 120:
+                if specs['autonomia_minutos'] < 1 or specs['autonomia_minutos'] > 600:
                     issues.append(f"Autonomía fuera de rango: {specs['autonomia_minutos']}min")
             
             if specs.get('alcance_metros') is not None:
-                if specs['alcance_metros'] < 30 or specs['alcance_metros'] > 20000:
+                if specs['alcance_metros'] < 20 or specs['alcance_metros'] > 100000:
                     issues.append(f"Alcance fuera de rango: {specs['alcance_metros']}m")
         
         # Validar marca

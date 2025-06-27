@@ -73,22 +73,22 @@ class DataValidator:
                         "peso_gramos": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 50000
+                            "maximum": 100000
                         },
                         "autonomia_minutos": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 120
+                            "maximum": 600
                         },
                         "alcance_metros": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 20000
+                            "maximum": 100000
                         },
                         "velocidad_max_kmh": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 200
+                            "maximum": 400
                         },
                         "resistencia_viento": {
                             "type": ["string", "null"],
@@ -102,12 +102,12 @@ class DataValidator:
                         "capacidad_bateria_mah": {
                             "type": ["number", "null"],
                             "minimum": 100,
-                            "maximum": 25000
+                            "maximum": 100000
                         },
                         "altitud_max_metros": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 12000
+                            "maximum": 20000
                         },
                         "temperatura_operativa": {
                             "type": ["string", "null"],
@@ -116,17 +116,17 @@ class DataValidator:
                         "velocidad_ascenso_ms": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 15
+                            "maximum": 50
                         },
                         "velocidad_descenso_ms": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 15
+                            "maximum": 50
                         },
                         "tiempo_hover_minutos": {
                             "type": ["number", "null"],
                             "minimum": 0,
-                            "maximum": 100
+                            "maximum": 600
                         }
                     }
                 },
@@ -309,13 +309,13 @@ class DataValidator:
         if specs.get('peso_gramos') and specs.get('autonomia_minutos'):
             peso = specs['peso_gramos']
             autonomia = specs['autonomia_minutos']
-            
+
             # Drones más pesados generalmente tienen menos autonomía
-            if peso > 2000 and autonomia > 45:
+            if peso > 4000 and autonomia > 60:
                 errors.append(f"Autonomía sospechosamente alta ({autonomia}min) para peso {peso}g")
-            
+
             # Drones ultra ligeros no deberían tener autonomía extrema
-            if peso < 250 and autonomia > 30:
+            if peso < 250 and autonomia > 50:
                 errors.append(f"Autonomía poco probable ({autonomia}min) para drone ultra ligero {peso}g")
         
         # === NUEVAS VALIDACIONES ===
@@ -323,20 +323,20 @@ class DataValidator:
         if specs.get('capacidad_bateria_mah') and specs.get('autonomia_minutos'):
             bateria = specs['capacidad_bateria_mah']
             autonomia = specs['autonomia_minutos']
-            
+
             # Ratio aproximado: 100-200 mAh por minuto de vuelo
-            if bateria / autonomia < 50:
+            if bateria / autonomia < 20:
                 errors.append(f"Capacidad de batería muy baja ({bateria}mAh) para autonomía {autonomia}min")
-            elif bateria / autonomia > 400:
+            elif bateria / autonomia > 500:
                 errors.append(f"Capacidad de batería sospechosamente alta ({bateria}mAh) para autonomía {autonomia}min")
         
         # Validar velocidades verticales coherentes
         if specs.get('velocidad_ascenso_ms') and specs.get('velocidad_descenso_ms'):
             ascenso = specs['velocidad_ascenso_ms']
             descenso = specs['velocidad_descenso_ms']
-            
+
             # Velocidad de descenso generalmente mayor que ascenso
-            if ascenso > descenso * 1.5:
+            if ascenso > descenso * 3:
                 errors.append(f"Velocidad de ascenso ({ascenso}m/s) inusualmente mayor que descenso ({descenso}m/s)")
         
         # Validar tiempo hover vs autonomía
@@ -351,11 +351,11 @@ class DataValidator:
         # Validar altitud máxima vs categoría
         if specs.get('altitud_max_metros'):
             altitud = specs['altitud_max_metros']
-            
+
             # Límites realistas para drones comerciales
-            if altitud > 10000:
+            if altitud > 20000:
                 errors.append(f"Altitud máxima ({altitud}m) excede límites típicos para drones comerciales")
-            elif altitud < 100:
+            elif altitud < 50:
                 errors.append(f"Altitud máxima muy baja ({altitud}m) para un drone")
         
         # Validar temperatura operativa
@@ -368,13 +368,13 @@ class DataValidator:
                     if len(temps) >= 2:
                         min_temp = int(temps[0])
                         max_temp = int(temps[1])
-                        
+
                         # Validar rango razonable
-                        if min_temp < -50:
+                        if min_temp < -80:
                             errors.append(f"Temperatura mínima operativa muy baja ({min_temp}°C)")
-                        if max_temp > 70:
+                        if max_temp > 90:
                             errors.append(f"Temperatura máxima operativa muy alta ({max_temp}°C)")
-                        if max_temp - min_temp < 20:
+                        if max_temp - min_temp < 10:
                             errors.append(f"Rango de temperatura operativa muy estrecho ({temp_str})")
                 except:
                     pass
