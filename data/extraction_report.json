@@ -1,0 +1,24 @@
+{
+  "resumen_extraccion": {
+    "fecha_inicio": "2025-06-27T11:30:07.098378",
+    "fecha_fin": "2025-06-27T11:31:45.066423",
+    "duracion_segundos": 97.968045,
+    "duracion_minutos": 1.63,
+    "total_drones_extraidos": 4,
+    "total_errores": 0,
+    "marcas_procesadas": 3
+  },
+  "detalle_por_marca": {
+    "dji": 1,
+    "autel": 1,
+    "parrot": 2
+  },
+  "errores_encontrados": [],
+  "urls_procesadas": [],
+  "especificaciones_extraidas": {},
+  "calidad_datos": {
+    "drones_con_specs_completas": 0,
+    "drones_con_specs_parciales": 0,
+    "drones_sin_specs": 0
+  }
+}

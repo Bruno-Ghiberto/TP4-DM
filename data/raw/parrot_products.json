@@ -1,0 +1,67 @@
+[
+  {
+    "marca": "parrot",
+    "modelo": "ANAFI Ai",
+    "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-Ai-product-sheet.pdf",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T11:31:35.426378",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "media",
+      "tipo_fuente": "pdf"
+    },
+    "especificaciones_tecnicas": {
+      "peso_gramos": 898.0,
+      "autonomia_minutos": 32.0,
+      "velocidad_max_kmh": 61.2
+    },
+    "camara": {},
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "retorno_automatico": true
+    },
+    "clasificacion": {
+      "categoria_peso": "ligero",
+      "nivel_usuario": "intermedio",
+      "uso_principal": [
+        "inspeccion",
+        "mapeo",
+        "principiantes"
+      ],
+      "certificaciones": []
+    }
+  },
+  {
+    "marca": "parrot",
+    "modelo": "ANAFI USA",
+    "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-USA-product-sheet.pdf",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T11:31:39.043275",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "media",
+      "tipo_fuente": "pdf"
+    },
+    "especificaciones_tecnicas": {
+      "autonomia_minutos": 32.0,
+      "velocidad_max_kmh": 52.92
+    },
+    "camara": {
+      "resolucion_video": "4K"
+    },
+    "caracteristicas_vuelo": {
+      "retorno_automatico": true
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "fotografia_profesional",
+        "videografia",
+        "inspeccion",
+        "mapeo"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  }
+]

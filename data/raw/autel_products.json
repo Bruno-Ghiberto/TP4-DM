@@ -1,0 +1,54 @@
+[
+  {
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-lite-enterprise-series/#jsgg",
+    "metadata": {
+      "fecha_extraccion": "2025-06-27T11:31:23.237269",
+      "version_scraper": "1.0.0",
+      "confiabilidad_datos": "alta"
+    },
+    "modelo": "Unknown Model",
+    "especificaciones_tecnicas": {
+      "peso_gramos": null,
+      "autonomia_minutos": null,
+      "alcance_metros": null,
+      "velocidad_max_kmh": null,
+      "resistencia_viento": null,
+      "temperatura_operacion": null,
+      "capacidad_bateria_mah": 1900.0,
+      "altitud_max_metros": null,
+      "temperatura_operativa": null,
+      "velocidad_ascenso_ms": null,
+      "velocidad_descenso_ms": null,
+      "tiempo_hover_minutos": null
+    },
+    "camara": {
+      "resolucion_video": "4K",
+      "fps_max": 30,
+      "sensor_tamaño": null,
+      "estabilizacion": "mecanica",
+      "zoom_optico": null,
+      "zoom_digital": null
+    },
+    "caracteristicas_vuelo": {
+      "evita_obstaculos": true,
+      "retorno_automatico": true,
+      "seguimiento_objeto": true,
+      "vuelo_nocturno": true,
+      "modo_sport": false,
+      "precision_hover": "GPS"
+    },
+    "clasificacion": {
+      "categoria_peso": "ultraligero",
+      "nivel_usuario": "principiante",
+      "uso_principal": [
+        "fotografia_profesional",
+        "videografia",
+        "principiantes"
+      ],
+      "certificaciones": [
+        "no_requiere_registro"
+      ]
+    }
+  }
+]

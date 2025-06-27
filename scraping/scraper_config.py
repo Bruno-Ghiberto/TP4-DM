@@ -7,14 +7,6 @@ SCRAPER_CONFIG = {
         'base_url': 'https://www.dji.com',
         'product_urls': [
             'https://www.dji.com/mavic-3-pro/specs',
-            'https://www.dji.com/mavic-3-classic/specs',
-            'https://www.dji.com/air-3s/specs',
-            'https://www.dji.com/air-3/specs',
-            'https://www.dji.com/mini-4-pro/specs',
-            'https://www.dji.com/mini-3/specs',
-            'https://www.dji.com/flip/specs',
-            'https://www.dji.com/avata-2/specs',
-            'https://www.dji.com/inspire-3/specs',
         ],
         'requires_js': True,
         'infinite_scroll': False,
@@ -50,15 +42,7 @@ SCRAPER_CONFIG = {
     'autel': {
         'base_url': 'https://www.autelrobotics.com',
         'product_urls': [
-            'https://www.autelrobotics.com/productdetail/evo-lite-enterprise-series/#jsgg',
-            'https://www.autelrobotics.com/productdetail/autel-alpha/#jsgg',
-            'https://www.autelrobotics.com/productdetail/evo-max-4t/#jsgg',
-            'https://www.autelrobotics.com/productdetail/evo-max-4n/#jsgg',
-            'https://www.autelrobotics.com/productdetail/evo-ii-enterprise-drones/#jsgg',
-            'https://www.autelrobotics.com/productdetail/evo-ii-dual-640t-drones/#jsgg',
-            'https://www.autelrobotics.com/productdetail/evo-ii-rtk-series-drones/#jsgg',
-            'https://www.autelrobotics.com/productdetail/evo-ii-pro-drones/#jsgg',
-            'https://www.autelrobotics.com/productdetail/dragonfish-series-drones/#jsgg',
+            'https://www.autelrobotics.com/productdetail/evo-lite-enterprise-series/#jsgg'
         ],
         'requires_js': True,
         'infinite_scroll': False,

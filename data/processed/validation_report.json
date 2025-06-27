@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-06-27T11:31:45.084197",
+  "total_drones_input": 4,
+  "total_drones_cleaned": 2,
+  "total_drones_valid": 0,
+  "validation_errors": [
+    {
+      "drone": "Unknown Model",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    },
+    {
+      "drone": "ANAFI USA",
+      "errors": [
+        "Error de esquema: 'ultraligero' is not one of ['ultra_ligero', 'ligero', 'medio', 'pesado']"
+      ]
+    }
+  ],
+  "success_rate": 0.0
+}
