@@ -1,0 +1,506 @@
+[
+  {
+    "modelo": "Parrot Anafi AI",
+    "marca": "Parrot",
+    "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-Ai-product-sheet.pdf",
+    "imagen": "data/images/ANAFI-AI.jpg",
+    "categoria": "Consumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.511961",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 898.0,
+      "dimensiones_plegado": "304×130×118 mm",
+      "vuelo_minutos": 32.0,
+      "vel_horizontal_mps": 17.0,
+      "vel_ascenso_mps": 4.0,
+      "alcance_video_km": null,
+      "altitud_despegue_m": 5000.0,
+      "resistencia_viento_mps": 14.0,
+      "almacenamiento_interno_gb": null,
+      "sensor_camara": "1/2 48 MP",
+      "resolucion_video": "4K / 1080p",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Video 4K",
+        "Cámara 48+ MP",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Parrot Anafi USA",
+    "marca": "Parrot",
+    "url_fuente": "https://www.parrot.com/assets/s3fs-public/2023-02/ANAFI-USA-product-sheet.pdf",
+    "imagen": "data/images/Anafi-USA.jpg",
+    "categoria": "Consumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512472",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 500.0,
+      "dimensiones_plegado": "252×104×84 mm",
+      "vuelo_minutos": 32.0,
+      "vel_horizontal_mps": 14.7,
+      "vel_ascenso_mps": 4.0,
+      "alcance_video_km": null,
+      "altitud_despegue_m": 5000.0,
+      "resistencia_viento_mps": 14.7,
+      "almacenamiento_interno_gb": null,
+      "sensor_camara": "No especificado",
+      "resolucion_video": "4K",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Video 4K",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Mavic 3 Pro",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/mavic-3-pro/specs",
+    "imagen": "data/images/Mavic 3 Pro.jpeg",
+    "categoria": "Prosumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512502",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 958,
+      "dimensiones_plegado": "231.1×98×95.4 mm",
+      "vuelo_minutos": 43,
+      "vel_horizontal_mps": 21,
+      "vel_ascenso_mps": 8,
+      "alcance_video_km": 15,
+      "altitud_despegue_m": 6000,
+      "resistencia_viento_mps": 12,
+      "almacenamiento_interno_gb": null,
+      "sensor_camara": "Hasselblad 4/3 CMOS 20 MP",
+      "resolucion_video": "4K",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Hasta 43 min de vuelo",
+        "Alcance 15 km",
+        "Video 4K",
+        "Cámara Hasselblad"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 8.0
+  },
+  {
+    "modelo": "Mavic 3 Classic",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/mavic-3-classic/specs",
+    "imagen": "data/images/Mavic 3 Classic.jpg",
+    "categoria": "Prosumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512547",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 895,
+      "dimensiones_plegado": "221×96.3×90.3 mm",
+      "vuelo_minutos": 46,
+      "vel_horizontal_mps": 21,
+      "vel_ascenso_mps": 8,
+      "alcance_video_km": 15,
+      "altitud_despegue_m": 6000,
+      "resistencia_viento_mps": 12,
+      "almacenamiento_interno_gb": 8,
+      "sensor_camara": "4/3 CMOS 20 MP",
+      "resolucion_video": "4K",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Hasta 46 min de vuelo",
+        "Alcance 15 km",
+        "Video 4K",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 8.0
+  },
+  {
+    "modelo": "Air 3S",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/air-3s/specs",
+    "imagen": "data/images/Air 3S.jpg",
+    "categoria": "Consumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512595",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 724,
+      "dimensiones_plegado": "214.19×100.63×89.17 mm",
+      "vuelo_minutos": 45,
+      "vel_horizontal_mps": 21,
+      "vel_ascenso_mps": 10,
+      "alcance_video_km": 20,
+      "altitud_despegue_m": 6000,
+      "resistencia_viento_mps": 12,
+      "almacenamiento_interno_gb": 42,
+      "sensor_camara": "1 50 MP",
+      "resolucion_video": "No especificado",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Hasta 45 min de vuelo",
+        "Alcance 20 km",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Air 3",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/air-3/specs",
+    "imagen": "data/images/Air 3.jpg",
+    "categoria": "Consumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512616",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 720,
+      "dimensiones_plegado": "207×100.5×91.1 mm",
+      "vuelo_minutos": 46,
+      "vel_horizontal_mps": 21,
+      "vel_ascenso_mps": 10,
+      "alcance_video_km": 20,
+      "altitud_despegue_m": 6000,
+      "resistencia_viento_mps": 12,
+      "almacenamiento_interno_gb": 8,
+      "sensor_camara": "No especificado",
+      "resolucion_video": "No especificado",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Hasta 46 min de vuelo",
+        "Alcance 20 km",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Mini 4 Pro",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/mini-4-pro/specs",
+    "imagen": "data/images/Mini 4 Pro.jpg",
+    "categoria": "Mini / Recreativo",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512627",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 249,
+      "dimensiones_plegado": "148×94×64 mm",
+      "vuelo_minutos": 34,
+      "vel_horizontal_mps": 16,
+      "vel_ascenso_mps": 5,
+      "alcance_video_km": 20,
+      "altitud_despegue_m": null,
+      "resistencia_viento_mps": null,
+      "almacenamiento_interno_gb": 2,
+      "sensor_camara": "48 MP",
+      "resolucion_video": "2654K",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Alcance 20 km",
+        "Video 4K",
+        "Cámara 48+ MP",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 8.5
+  },
+  {
+    "modelo": "Mini 3",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/mini-3/specs",
+    "imagen": "data/images/Mini 3.jpeg",
+    "categoria": "Mini / Recreativo",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512658",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 248,
+      "dimensiones_plegado": "148×90×62 mm",
+      "vuelo_minutos": 38,
+      "vel_horizontal_mps": 16,
+      "vel_ascenso_mps": 5,
+      "alcance_video_km": 10,
+      "altitud_despegue_m": 4000,
+      "resistencia_viento_mps": null,
+      "almacenamiento_interno_gb": 32,
+      "sensor_camara": "48 MP",
+      "resolucion_video": "No especificado",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Alcance 10 km",
+        "Evitación de obstáculos",
+        "Ultraligero (<250g)"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 8.0
+  },
+  {
+    "modelo": "Avata 2",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/avata-2/specs",
+    "imagen": "data/images/Avata 2.jpg",
+    "categoria": "Consumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512677",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 377,
+      "dimensiones_plegado": "185×212×64 mm",
+      "vuelo_minutos": null,
+      "vel_horizontal_mps": 8,
+      "vel_ascenso_mps": 6,
+      "alcance_video_km": 13,
+      "altitud_despegue_m": 5000,
+      "resistencia_viento_mps": null,
+      "almacenamiento_interno_gb": 46,
+      "sensor_camara": "No especificado",
+      "resolucion_video": "4K",
+      "deteccion_obstaculos": false,
+      "caracteristicas_destacadas": [
+        "Alcance 13 km",
+        "Video 4K"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 6.0
+  },
+  {
+    "modelo": "Inspire 3",
+    "marca": "DJI",
+    "url_fuente": "https://www.dji.com/inspire-3/specs",
+    "imagen": "data/images/Inspire 3.jpg",
+    "categoria": "Consumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512703",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 516,
+      "dimensiones_plegado": null,
+      "vuelo_minutos": 28,
+      "vel_horizontal_mps": null,
+      "vel_ascenso_mps": 8,
+      "alcance_video_km": 15,
+      "altitud_despegue_m": 7000,
+      "resistencia_viento_mps": null,
+      "almacenamiento_interno_gb": null,
+      "sensor_camara": "1",
+      "resolucion_video": "No especificado",
+      "deteccion_obstaculos": false,
+      "caracteristicas_destacadas": [
+        "Alcance 15 km"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 5.5
+  },
+  {
+    "modelo": "Evo Lite Enterprise Series",
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-lite-enterprise-series/#jsgg",
+    "imagen": "data/images/EVO Lite Enterprise.jpg",
+    "categoria": "Prosumer",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512727",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 309.0,
+      "dimensiones_plegado": "226.3×215.4×31.5 mm",
+      "vuelo_minutos": 40.0,
+      "vel_horizontal_mps": 18.0,
+      "vel_ascenso_mps": 6.0,
+      "alcance_video_km": 12.0,
+      "altitud_despegue_m": 3000.0,
+      "resistencia_viento_mps": 3.0,
+      "almacenamiento_interno_gb": 4.0,
+      "sensor_camara": "1/2 inch 48 MP",
+      "resolucion_video": "",
+      "deteccion_obstaculos": false,
+      "caracteristicas_destacadas": [
+        "Hasta 40 min de vuelo",
+        "Alcance 12 km"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 6.5
+  },
+  {
+    "modelo": "Alpha",
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/autel-alpha/#jsgg",
+    "imagen": "data/images/Alpha.jpg",
+    "categoria": "Industrial",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512791",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 5535.0,
+      "dimensiones_plegado": "780×568×278 mm",
+      "vuelo_minutos": 40.0,
+      "vel_horizontal_mps": 25.0,
+      "vel_ascenso_mps": 15.0,
+      "alcance_video_km": 15.0,
+      "altitud_despegue_m": 4500.0,
+      "resistencia_viento_mps": 12.0,
+      "almacenamiento_interno_gb": 128.0,
+      "sensor_camara": "Uncooled VOx Microbolometer",
+      "resolucion_video": "",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Hasta 40 min de vuelo",
+        "Alcance 15 km",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Evo Max 4T",
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-max-4t/#jsgg",
+    "imagen": "data/images/EVO-Max-4T.jpg",
+    "categoria": "Profesional",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512814",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 1665.0,
+      "dimensiones_plegado": "562×649×150 mm",
+      "vuelo_minutos": 42.0,
+      "vel_horizontal_mps": 8.0,
+      "vel_ascenso_mps": 8.0,
+      "alcance_video_km": 15.0,
+      "altitud_despegue_m": 4500.0,
+      "resistencia_viento_mps": 12.0,
+      "almacenamiento_interno_gb": 128.0,
+      "sensor_camara": "Uncooled VOx Microbolometer",
+      "resolucion_video": "30p",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Hasta 42 min de vuelo",
+        "Alcance 15 km",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Evo II Enterprise V3",
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-ii-enterprise-drones/#jsgg",
+    "imagen": "data/images/EVO II Enterprise.jpg",
+    "categoria": "Enterprise",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512835",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 1110.0,
+      "dimensiones_plegado": null,
+      "vuelo_minutos": 42.0,
+      "vel_horizontal_mps": 20.0,
+      "vel_ascenso_mps": 8.0,
+      "alcance_video_km": 10.0,
+      "altitud_despegue_m": 5000.0,
+      "resistencia_viento_mps": 3.0,
+      "almacenamiento_interno_gb": 8.0,
+      "sensor_camara": "1/2 inch 12 MP",
+      "resolucion_video": "640*512 30fps",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Hasta 42 min de vuelo",
+        "Alcance 10 km",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Evo II Dual 640T V3",
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-ii-dual-640t-drones/#jsgg",
+    "imagen": "data/images/EVO II Dual 640t.jpg",
+    "categoria": "Enterprise",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512855",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 1209.0,
+      "dimensiones_plegado": null,
+      "vuelo_minutos": 38.0,
+      "vel_horizontal_mps": 20.0,
+      "vel_ascenso_mps": 8.0,
+      "alcance_video_km": 22.0,
+      "altitud_despegue_m": 5000.0,
+      "resistencia_viento_mps": 3.0,
+      "almacenamiento_interno_gb": 8.0,
+      "sensor_camara": "1/2 inch 12 MP",
+      "resolucion_video": "2160p",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Alcance 22 km",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Evo II Pro V3",
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/evo-ii-pro-drones/#jsgg",
+    "imagen": "data/images/EVO II PRO.jpg",
+    "categoria": "Profesional",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512872",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 1191.0,
+      "dimensiones_plegado": null,
+      "vuelo_minutos": 39.0,
+      "vel_horizontal_mps": 20.0,
+      "vel_ascenso_mps": 8.0,
+      "alcance_video_km": 25.0,
+      "altitud_despegue_m": 5000.0,
+      "resistencia_viento_mps": 3.0,
+      "almacenamiento_interno_gb": 8.0,
+      "sensor_camara": "1 inch 20 MP",
+      "resolucion_video": "",
+      "deteccion_obstaculos": true,
+      "caracteristicas_destacadas": [
+        "Alcance 25 km",
+        "Evitación de obstáculos"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 7.5
+  },
+  {
+    "modelo": "Dragonfish Series",
+    "marca": "Autel",
+    "url_fuente": "https://www.autelrobotics.com/productdetail/dragonfish-series/#jsgg",
+    "imagen": "data/images/Dragonfish.jpg",
+    "categoria": "Industrial",
+    "fecha_actualizacion": "2025-07-04T22:01:11.512901",
+    "especificaciones_tecnicas": {
+      "peso_gramos": 7500.0,
+      "dimensiones_plegado": "1655×2980×520 mm",
+      "vuelo_minutos": 158.0,
+      "vel_horizontal_mps": 5.0,
+      "vel_ascenso_mps": 5.0,
+      "alcance_video_km": null,
+      "altitud_despegue_m": 6000.0,
+      "resistencia_viento_mps": 15.0,
+      "almacenamiento_interno_gb": null,
+      "sensor_camara": "No especificado",
+      "resolucion_video": "",
+      "deteccion_obstaculos": false,
+      "caracteristicas_destacadas": [
+        "Hasta 158 min de vuelo"
+      ]
+    },
+    "precio_usd": null,
+    "disponibilidad": "Disponible",
+    "puntuacion_general": 6.0
+  }
+]
